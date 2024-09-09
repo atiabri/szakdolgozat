@@ -11,7 +11,7 @@ Cross-platform mobil alkalmazás fejlesztés a Flutter keretrendszer használat�
 
 TODO (elkészítendő feladatok):
 - [X] : Github repository
-- [X] : work branch
+- [ ] : work branch
 - [ ] : több adat rögzítése adott session-ről
 - [ ] : rögzített adatok kiértékelése és megjelenítése
 - [ ] : Bluetooth connection
