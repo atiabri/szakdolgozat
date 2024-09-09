@@ -5,9 +5,9 @@
 Cross-platform mobil alkalmazás fejlesztés a Flutter keretrendszer használatával Dart nyelven
 
 ## Futtatás parancsok:
-flutter clean
-flutter pub get
-flutter run
+- flutter clean
+- flutter pub get
+- flutter run
 
 TODO (elkészítendő feladatok):
 - [X] : Github repository
