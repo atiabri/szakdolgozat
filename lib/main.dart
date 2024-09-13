@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:onlab_final/pages/home.dart';
+import 'package:onlab_final/pages/login_page.dart'; // Importáld a regisztrációs oldalt
+import 'package:onlab_final/db/db.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await DB.init(); // Await initialization of the database
   runApp(App());
 }
 
 class App extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -14,7 +17,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.purple,
       ),
-      home: HomePage(key: Key('')),
+      home: LoginPage(),
     );
   }
 }

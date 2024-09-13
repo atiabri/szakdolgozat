@@ -17,7 +17,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    DB.init().then((value) => _fetchEntries());
+    _fetchEntries();
   }
 
   // A futások adatainak lekérdezése és a lista frissítése
@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
 
   // Új futás hozzáadása és az adatok frissítése
   void _addEntries(Entry en) async {
-    await DB.insert(Entry.table, en);
+    await DB.insert(Entry.table, en.toMap());
     _fetchEntries(); // Újra lekéri az adatokat
   }
 
@@ -38,11 +38,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text("AtiRun"),
-          foregroundColor: Colors.white,
-          backgroundColor: Color.fromRGBO(125, 69, 180, 1)),
-
-      // ListView.builder használata a hatékonyabb megjelenítéshez
+        title: Text("AtiRun"),
+        foregroundColor: Colors.white,
+        backgroundColor: Color.fromRGBO(125, 69, 180, 1),
+      ),
       body: _data.isEmpty
           ? Center(child: Text("No entries yet"))
           : ListView.builder(
@@ -51,12 +50,12 @@ class _HomePageState extends State<HomePage> {
                 return EntryCard(entry: _data[index]); // Kártya megjelenítése
               },
             ),
-
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
-                context, MaterialPageRoute(builder: (context) => MapPage()))
-            .then((value) {
-          if (value != null) {
+          context,
+          MaterialPageRoute(builder: (context) => MapPage()),
+        ).then((value) {
+          if (value != null && value is Entry) {
             _addEntries(value);
           }
         }),
