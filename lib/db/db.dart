@@ -25,10 +25,12 @@ abstract class DB {
       await db.execute('''
         CREATE TABLE entries (
           id INTEGER PRIMARY KEY NOT NULL,
+          user_id INTEGER,  -- Add this line
           date STRING, 
           duration STRING, 
           speed REAL, 
-          distance REAL
+          distance REAL,
+          FOREIGN KEY(user_id) REFERENCES users(id)  -- Add this line
         )
       ''');
       print('Table "entries" created'); // Debug message
@@ -61,10 +63,19 @@ abstract class DB {
   }
 
   // Query data from a table
-  static Future<List<Map<String, dynamic>>> query(String table) async {
+  static Future<List<Map<String, dynamic>>> query(String table,
+      {int? userId}) async {
     final db = await getDatabase();
     print('Querying table: $table'); // Debug message
-    return await db.query(table);
+    if (userId != null) {
+      return await db.query(
+        table,
+        where: 'user_id = ?',
+        whereArgs: [userId], // Filter by user_id
+      );
+    } else {
+      return await db.query(table);
+    }
   }
 
   // Insert data into a table

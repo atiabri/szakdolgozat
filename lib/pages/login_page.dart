@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:onlab_final/pages/home.dart';
-import 'package:onlab_final/pages/reg_page.dart'; // Updated import for RegisterPage
+import 'package:onlab_final/pages/reg_page.dart';
 import 'package:onlab_final/model/user.dart';
 import 'package:onlab_final/db/db.dart';
 import 'package:sqflite/sqflite.dart';
@@ -35,8 +35,7 @@ class _LoginPageState extends State<LoginPage> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
-                final Database db = await DB
-                    .getDatabase(); // Use the public method to get the database
+                final Database db = await DB.getDatabase();
                 String username = usernameController.text;
                 String password = passwordController.text;
 
@@ -44,11 +43,14 @@ class _LoginPageState extends State<LoginPage> {
                 User? user = await User.getUserByUsername(db, username);
 
                 if (user != null && user.password == password) {
-                  // Successful login, navigate to home page
+                  // Successful login, navigate to home page with user ID
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => HomePage(key: Key(''))));
+                          builder: (context) => HomePage(
+                                key: Key(''),
+                                currentUserId: user.id!,
+                              )));
                 } else {
                   // Handle login error (e.g., show a dialog)
                   showDialog(

@@ -5,7 +5,9 @@ import 'package:onlab_final/pages/maps.dart';
 import 'package:onlab_final/widgets/entry_card.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({required Key key}) : super(key: key);
+  final int currentUserId; // Pass current user ID to HomePage
+
+  HomePage({required Key key, required this.currentUserId}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -20,18 +22,19 @@ class _HomePageState extends State<HomePage> {
     _fetchEntries();
   }
 
-  // A futások adatainak lekérdezése és a lista frissítése
+  // Fetch run entries filtered by user ID
   void _fetchEntries() async {
-    List<Map<String, dynamic>> _results = await DB.query(Entry.table);
+    List<Map<String, dynamic>> _results = await DB.query(Entry.table,
+        userId: widget.currentUserId); // Filter by current user's ID
     setState(() {
       _data = _results.map((item) => Entry.fromMap(item)).toList();
     });
   }
 
-  // Új futás hozzáadása és az adatok frissítése
+  // Add a new entry and refresh the list
   void _addEntries(Entry en) async {
     await DB.insert(Entry.table, en.toMap());
-    _fetchEntries(); // Újra lekéri az adatokat
+    _fetchEntries(); // Refresh entries
   }
 
   @override
@@ -47,13 +50,15 @@ class _HomePageState extends State<HomePage> {
           : ListView.builder(
               itemCount: _data.length,
               itemBuilder: (context, index) {
-                return EntryCard(entry: _data[index]); // Kártya megjelenítése
+                return EntryCard(entry: _data[index]); // Display entry card
               },
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MapPage()),
+          MaterialPageRoute(
+              builder: (context) => MapPage(
+                  userId: widget.currentUserId)), // Pass current user ID
         ).then((value) {
           if (value != null && value is Entry) {
             _addEntries(value);

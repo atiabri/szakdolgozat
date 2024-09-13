@@ -84,24 +84,36 @@ class _RegisterPageState extends State<RegisterPage> {
   void _registerUser() async {
     try {
       DateTime birthDate = DateTime.parse(birthdateController.text);
+      double height = double.parse(heightController.text);
+      double weight = double.parse(weightController.text);
 
-      final Database db =
-          await DB.getDatabase(); // Use the public method to get the database
+      final Database db = await DB.getDatabase();
       User newUser = User(
         fullName: fullNameController.text,
         username: usernameController.text,
         password: passwordController.text,
         birthDate: birthDate,
         gender: gender ?? '',
-        height: double.parse(heightController.text),
-        weight: double.parse(weightController.text),
+        height: height,
+        weight: weight,
       );
 
       // Save user to the database
       await User.insertUser(db, newUser);
 
-      Navigator.pushReplacement(context,
-          MaterialPageRoute(builder: (context) => HomePage(key: Key(''))));
+      // Fetch the newly created user to get their ID
+      User? createdUser = await User.getUserByUsername(db, newUser.username);
+      if (createdUser != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(
+              key: Key(''),
+              currentUserId: createdUser.id!,
+            ),
+          ),
+        );
+      }
     } catch (e) {
       // Handle date parsing or other errors
       showDialog(
