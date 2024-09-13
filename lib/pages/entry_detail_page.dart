@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:onlab_final/model/entry.dart';
+import 'package:share_plus/share_plus.dart';
 
 class EntryDetailPage extends StatelessWidget {
   final Entry entry;
 
   EntryDetailPage({required this.entry});
+
+  void _shareDetails() {
+    final String content = '''
+Run Details:
+Date: ${entry.date}
+Distance: ${(entry.distance / 1000).toStringAsFixed(2)} km
+Duration: ${entry.duration}
+Speed: ${entry.speed.toStringAsFixed(2)} perc/km
+''';
+
+    Share.share(content, subject: 'Run Details');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,6 +84,14 @@ class EntryDetailPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _shareDetails,
+              child: Text('Share'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromRGBO(125, 69, 180, 1),
+                foregroundColor: Colors.white,
+              ),
+            ),
             // Optionally, add a section for the map or screenshot of the run route here
           ],
         ),
