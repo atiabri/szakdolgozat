@@ -13,6 +13,7 @@ TODO (elkészítendő feladatok):
 - [X] : Github repository
 - [ ] : work branch
 - [ ] : több adat rögzítése adott session-ről
+- [ ] : Rögzített session adatainak megtekintése
 - [ ] : rögzített adatok kiértékelése és megjelenítése
 - [ ] : Bluetooth connection
 - [ ] : Social média activity megosztás
