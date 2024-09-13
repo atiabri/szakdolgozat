@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:onlab_final/model/entry.dart';
+import 'package:onlab_final/pages/entry_detail_page.dart'; // Hozd létre ezt az oldalt
 
 class EntryCard extends StatelessWidget {
   final Entry entry;
@@ -8,9 +9,20 @@ class EntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(10),
-      child: Container(
+    return GestureDetector(
+      onTap: () {
+        // Navigálás a részletes oldalra a kártyára való kattintáskor
+        print("Navigating to EntryDetailPage");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EntryDetailPage(entry: entry),
+          ),
+        );
+      },
+      child: Card(
+        margin: EdgeInsets.all(10),
+        child: Container(
           padding: EdgeInsets.all(20),
           child: Column(
             children: [
@@ -30,9 +42,11 @@ class EntryCard extends StatelessWidget {
                   Text(entry.speed.toStringAsFixed(2) + " perc/km",
                       style: GoogleFonts.montserrat(fontSize: 14)),
                 ],
-              )
+              ),
             ],
-          )),
+          ),
+        ),
+      ),
     );
   }
 }

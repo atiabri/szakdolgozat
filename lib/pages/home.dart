@@ -12,25 +12,26 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late List<Entry> _data;
-  List<EntryCard> _cards = [];
+  late List<Entry> _data = [];
 
+  @override
   void initState() {
     super.initState();
     DB.init().then((value) => _fetchEntries());
   }
 
+  // A futások adatainak lekérdezése és a lista frissítése
   void _fetchEntries() async {
-    _cards = [];
     List<Map<String, dynamic>> _results = await DB.query(Entry.table);
-    _data = _results.map((item) => Entry.fromMap(item)).toList();
-    _data.forEach((element) => _cards.add(EntryCard(entry: element)));
-    setState(() {});
+    setState(() {
+      _data = _results.map((item) => Entry.fromMap(item)).toList();
+    });
   }
 
+  // Új futás hozzáadása és az adatok frissítése
   void _addEntries(Entry en) async {
-    DB.insert(Entry.table, en);
-    _fetchEntries();
+    await DB.insert(Entry.table, en);
+    _fetchEntries(); // Újra lekéri az adatokat
   }
 
   @override
@@ -38,18 +39,30 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
           title: Text("AtiRun"),
-          foregroundColor: Color.fromRGBO(255, 255, 255, 1),
+          foregroundColor: Colors.white,
           backgroundColor: Color.fromRGBO(125, 69, 180, 1)),
-      body: ListView(
-        children: _cards,
-      ),
+
+      // ListView.builder használata a hatékonyabb megjelenítéshez
+      body: _data.isEmpty
+          ? Center(child: Text("No entries yet"))
+          : ListView.builder(
+              itemCount: _data.length,
+              itemBuilder: (context, index) {
+                return EntryCard(entry: _data[index]); // Kártya megjelenítése
+              },
+            ),
+
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.push(
                 context, MaterialPageRoute(builder: (context) => MapPage()))
-            .then((value) => _addEntries(value)),
-        tooltip: 'Increment',
+            .then((value) {
+          if (value != null) {
+            _addEntries(value);
+          }
+        }),
+        tooltip: 'Add Run',
         child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }
