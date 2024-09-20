@@ -8,9 +8,9 @@ import 'package:stop_watch_timer/stop_watch_timer.dart';
 import 'package:onlab_final/model/entry.dart';
 
 class MapPage extends StatefulWidget {
-  final int userId; // Add this field
+  final int userId;
 
-  MapPage({required this.userId}); // Add this parameter
+  MapPage({required this.userId});
 
   @override
   State<StatefulWidget> createState() => _MapPageState();
@@ -26,10 +26,7 @@ class _MapPageState extends State<MapPage> {
   double _dist = 0;
   late String _displayTime;
   late int _time;
-  late int _lastTime;
-  double _speed = 0;
   double _avgSpeed = 0;
-  int _speedCounter = 0;
 
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
 
@@ -60,8 +57,6 @@ class _MapPageState extends State<MapPage> {
     _mapController = controller;
     double appendDist;
 
-    print("Map created");
-
     _location.onLocationChanged.listen((event) {
       LatLng loc = LatLng(event.latitude!, event.longitude!);
       _mapController.animateCamera(CameraUpdate.newCameraPosition(
@@ -83,7 +78,21 @@ class _MapPageState extends State<MapPage> {
             color: Colors.blue,
             width: 3));
       });
+
+      // Update average speed
+      _updateAverageSpeed();
     });
+  }
+
+  // This function calculates the average speed in min/km
+  void _updateAverageSpeed() {
+    if (_dist > 0 && _time > 0) {
+      double timeInMinutes = _time / (1000 * 60);
+      double distanceInKm = _dist / 1000;
+      _avgSpeed = timeInMinutes / distanceInKm;
+    } else {
+      _avgSpeed = 0; // Avoid division by zero
+    }
   }
 
   @override
@@ -114,10 +123,13 @@ class _MapPageState extends State<MapPage> {
                     children: [
                       Column(
                         children: [
-                          Text("SPEED (KM/H)",
+                          Text("AVG SPEED (MIN/KM)",
                               style: GoogleFonts.montserrat(
                                   fontSize: 10, fontWeight: FontWeight.w300)),
-                          Text(_speed.toStringAsFixed(2),
+                          Text(
+                              _avgSpeed > 0
+                                  ? _avgSpeed.toStringAsFixed(2)
+                                  : "--",
                               style: GoogleFonts.montserrat(
                                   fontSize: 30, fontWeight: FontWeight.w300))
                         ],
@@ -167,12 +179,12 @@ class _MapPageState extends State<MapPage> {
                     ),
                     padding: EdgeInsets.all(0),
                     onPressed: () async {
-                      // Create the new Entry object with user ID
+                      // Create the new Entry object with user ID and average speed
                       Entry en = Entry(
                           date:
                               DateFormat.yMMMMd('en_US').format(DateTime.now()),
                           duration: _displayTime,
-                          speed: (_dist / _time) * 10,
+                          speed: _avgSpeed, // Store average speed in min/km
                           distance: _dist,
                           userId: widget.userId); // Pass user ID
                       Navigator.pop(context, en);
