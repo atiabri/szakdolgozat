@@ -11,10 +11,10 @@ Cross-platform mobil alkalmazás fejlesztés a Flutter keretrendszer használat�
 
 TODO (elkészítendő feladatok):
 - [X] : Github repository
-- [ ] : work branch
-- [ ] : több adat rögzítése adott session-ről
-- [ ] : Rögzített session adatainak megtekintése
-- [ ] : rögzített adatok kiértékelése és megjelenítése
-- [ ] : Bluetooth connection
-- [ ] : Social média activity megosztás
+- [ ] : több adat rögzítése adott session-ről(magasság)
+- [ ] : több fajta session indítása(gyaloglás, kerékpár - főképernyőn máshogy megjeleníteni)
+- [ ] : sebességmérés tökéletesítése
+- [ ] : Rögzített session adatainak megtekintése (térkép is)
+- [ ] : rögzített adatok kiértékelése és megjelenítése főképernyőn (átlagsebesség javitas)
+- [X] : Social média activity megosztás
 - [ ] : Mesterséges intelligencia támogatás
