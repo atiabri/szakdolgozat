@@ -25,12 +25,13 @@ abstract class DB {
       await db.execute('''
         CREATE TABLE entries (
           id INTEGER PRIMARY KEY NOT NULL,
-          user_id INTEGER,  -- Add this line
+          user_id INTEGER,
           date STRING, 
           duration STRING, 
           speed REAL, 
           distance REAL,
-          FOREIGN KEY(user_id) REFERENCES users(id)  -- Add this line
+          speed_per_km TEXT,  -- Új mező a kilométerenkénti sebességekhez
+          FOREIGN KEY(user_id) REFERENCES users(id)
         )
       ''');
       print('Table "entries" created'); // Debug message
