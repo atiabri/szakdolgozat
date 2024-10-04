@@ -24,10 +24,15 @@ class _ActivityChartPageState extends State<ActivityChartPage> {
 
   // Fetch the user's activities from the database
   void _fetchUserActivities() async {
+    print("Lekérdezés kezdete..."); // Debug üzenet
     List<Map<String, dynamic>> results =
         await DB.query(Entry.table, userId: widget.userId);
+
+    print("Lekérdezett eredmények: $results"); // Debug üzenet
+
     setState(() {
       _userEntries = results.map((item) => Entry.fromMap(item)).toList();
+      print("Futás adatok: $_userEntries"); // Debug üzenet
     });
   }
 
@@ -121,16 +126,26 @@ class _ActivityChartPageState extends State<ActivityChartPage> {
                           showTitles: false, // Hide top titles
                         ),
                       ),
-                      scatterSpots: _userEntries
-                          .map(
-                            (entry) => ScatterSpot(
-                              entry.distance / 1000, // X-axis: distance in km
-                              entry.speed, // Y-axis: speed in min/km
-                              color: Colors.purple,
-                              radius: 6,
-                            ),
-                          )
-                          .toList(),
+                      scatterSpots: _userEntries.asMap().entries.map((entry) {
+                        int index = entry.key;
+                        Entry data = entry.value;
+
+                        // Avoid division by zero for single-entry or empty list cases
+                        double ratio = (_userEntries.length > 1)
+                            ? index / (_userEntries.length - 1)
+                            : 1.0;
+
+                        // Interpolate color between blue (oldest) and red (newest)
+                        Color color =
+                            Color.lerp(Colors.blue, Colors.red, ratio)!;
+
+                        return ScatterSpot(
+                          data.distance / 1000, // X-axis: distance in km
+                          data.speed, // Y-axis: speed in min/km
+                          color: color,
+                          radius: 6,
+                        );
+                      }).toList(),
                     ),
                   ),
                 ),
