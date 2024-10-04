@@ -30,7 +30,8 @@ abstract class DB {
           duration STRING, 
           speed REAL, 
           distance REAL,
-          speed_per_km TEXT,  -- Új mező a kilométerenkénti sebességekhez
+          elevation_gain REAL,  -- Új mező a szintkülönbséghez
+          speed_per_km TEXT,  -- Kilométerenkénti sebességek mezője
           FOREIGN KEY(user_id) REFERENCES users(id)
         )
       ''');

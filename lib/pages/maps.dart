@@ -30,6 +30,9 @@ class _MapPageState extends State<MapPage> {
   late int _time;
   double _avgSpeed = 0;
 
+  double _elevationGain = 0; // Szintkülönbség követéséhez
+  double? _lastAltitude; // Előző pozíció magasságának tárolása
+
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
 
   @override
@@ -70,6 +73,16 @@ class _MapPageState extends State<MapPage> {
         setState(() {
           _dist += appendDist;
         });
+
+        // Szintkülönbség számolása
+        if (_lastAltitude != null && event.altitude != null) {
+          double altitudeChange = event.altitude! - _lastAltitude!;
+          if (altitudeChange > 0) {
+            _elevationGain +=
+                altitudeChange; // Csak a pozitív szintkülönbséget adjuk hozzá
+          }
+        }
+        _lastAltitude = event.altitude; // Aktuális magasság tárolása
 
         // Kilométer ellenőrzés
         if (_dist / 1000 > _kmCheckpoint + 1) {
@@ -206,6 +219,8 @@ class _MapPageState extends State<MapPage> {
                           duration: _displayTime,
                           speed: _avgSpeed, // Átlagsebesség (min/km)
                           distance: _dist,
+                          elevationGain:
+                              _elevationGain, // Szintkülönbség mentése
                           speedPerKm:
                               _speedsPerKm, // Kilométerenkénti sebességek
                           userId: widget.userId); // User ID hozzáadása
