@@ -17,6 +17,7 @@ class _RegisterPageState extends State<RegisterPage> {
   String? gender;
   TextEditingController heightController = TextEditingController();
   TextEditingController weightController = TextEditingController();
+  String? level;
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +26,11 @@ class _RegisterPageState extends State<RegisterPage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Reduce spacing above the first field
+            SizedBox(height: 20),
             TextField(
               controller: fullNameController,
               decoration: InputDecoration(labelText: 'Full Name'),
@@ -45,21 +49,6 @@ class _RegisterPageState extends State<RegisterPage> {
               decoration: InputDecoration(labelText: 'Birthdate (yyyy-mm-dd)'),
               keyboardType: TextInputType.datetime,
             ),
-            DropdownButton<String>(
-              hint: Text('Gender'),
-              value: gender,
-              items: <String>['Male', 'Female', 'Other'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                setState(() {
-                  gender = newValue;
-                });
-              },
-            ),
             TextField(
               controller: heightController,
               decoration: InputDecoration(labelText: 'Height (cm)'),
@@ -71,6 +60,52 @@ class _RegisterPageState extends State<RegisterPage> {
               keyboardType: TextInputType.number,
             ),
             SizedBox(height: 20),
+            // Wrap Gender and Level in a Row for horizontal alignment
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: DropdownButton<String>(
+                    hint: Text('Gender'),
+                    value: gender,
+                    isExpanded: true, // Make it fill the available space
+                    items:
+                        <String>['Male', 'Female', 'Other'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        gender = newValue;
+                      });
+                    },
+                  ),
+                ),
+                SizedBox(width: 16), // Add spacing between the two dropdowns
+                Expanded(
+                  child: DropdownButton<String>(
+                    hint: Text('Level'),
+                    value: level,
+                    isExpanded: true, // Make it fill the available space
+                    items: <String>['Beginner', 'Intermediate', 'Advanced']
+                        .map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        level = newValue;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 30),
             ElevatedButton(
               onPressed: _registerUser,
               child: Text('Register'),
@@ -96,12 +131,11 @@ class _RegisterPageState extends State<RegisterPage> {
         gender: gender ?? '',
         height: height,
         weight: weight,
+        level: level ?? 'Beginner',
       );
 
-      // Save user to the database
       await User.insertUser(db, newUser);
 
-      // Fetch the newly created user to get their ID
       User? createdUser = await User.getUserByUsername(db, newUser.username);
       if (createdUser != null) {
         Navigator.pushReplacement(
@@ -115,7 +149,6 @@ class _RegisterPageState extends State<RegisterPage> {
         );
       }
     } catch (e) {
-      // Handle date parsing or other errors
       showDialog(
         context: context,
         builder: (BuildContext context) {

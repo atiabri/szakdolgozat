@@ -4,7 +4,7 @@ import 'package:path/path.dart' as p;
 
 abstract class DB {
   static Database? _db;
-  static int get _version => 1;
+  static int get _version => 2; // Verziót frissítettük 2-re
 
   // Initialize the database
   static Future<void> init() async {
@@ -12,7 +12,8 @@ abstract class DB {
       String _path = await getDatabasesPath();
       String _dbpath = p.join(_path, 'database.db');
       print('Opening database at path: $_dbpath'); // Debug message
-      _db = await openDatabase(_dbpath, version: _version, onCreate: onCreate);
+      _db = await openDatabase(_dbpath,
+          version: _version, onCreate: onCreate, onUpgrade: onUpgrade);
       print('Database initialized'); // Debug message
     } catch (ex) {
       print('Error initializing database: $ex'); // Debug message
@@ -30,8 +31,8 @@ abstract class DB {
           duration STRING, 
           speed REAL, 
           distance REAL,
-          elevation_gain REAL,  -- Új mező a szintkülönbséghez
-          speed_per_km TEXT,  -- Kilométerenkénti sebességek mezője
+          elevation_gain REAL,
+          speed_per_km TEXT,
           FOREIGN KEY(user_id) REFERENCES users(id)
         )
       ''');
@@ -46,12 +47,22 @@ abstract class DB {
           birth_date TEXT,
           gender TEXT,
           height REAL,
-          weight REAL
+          weight REAL,
+          level TEXT  -- Új mező a szinthez
         )
       ''');
       print('Table "users" created'); // Debug message
     } catch (ex) {
       print('Error creating tables: $ex'); // Debug message
+    }
+  }
+
+  // Upgrade database for version changes
+  static FutureOr<void> onUpgrade(
+      Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      await db.execute(
+          'ALTER TABLE users ADD COLUMN level TEXT DEFAULT "Beginner"');
     }
   }
 

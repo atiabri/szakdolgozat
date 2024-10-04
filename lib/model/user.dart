@@ -1,6 +1,5 @@
 import 'package:sqflite/sqflite.dart';
 
-// Define the User class
 class User {
   int? id;
   String fullName;
@@ -10,6 +9,7 @@ class User {
   String gender;
   double weight;
   double height;
+  String level; // Új mező a szinthez
 
   User({
     this.id,
@@ -20,6 +20,7 @@ class User {
     required this.gender,
     required this.weight,
     required this.height,
+    required this.level, // Új mező a konstruktorban
   });
 
   // Convert a User object to a Map for database operations
@@ -33,6 +34,7 @@ class User {
       'gender': gender,
       'weight': weight,
       'height': height,
+      'level': level, // Új mező a mapban
     };
   }
 
@@ -47,6 +49,7 @@ class User {
       gender: map['gender'],
       weight: map['weight'],
       height: map['height'],
+      level: map['level'], // Új mező beolvasása
     );
   }
 
