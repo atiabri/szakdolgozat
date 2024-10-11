@@ -22,16 +22,11 @@ class _MapPageState extends State<MapPage> {
   late GoogleMapController _mapController;
   LatLng _center = const LatLng(0, 0);
   List<LatLng> route = [];
-  List<double> _speedsPerKm = []; // Kilométerenkénti sebességek
 
   double _dist = 0;
-  double _kmCheckpoint = 0; // Kilométer checkpoint
   late String _displayTime;
   late int _time;
   double _avgSpeed = 0;
-
-  double _elevationGain = 0; // Szintkülönbség követéséhez
-  double? _lastAltitude; // Előző pozíció magasságának tárolása
 
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
 
@@ -73,25 +68,6 @@ class _MapPageState extends State<MapPage> {
         setState(() {
           _dist += appendDist;
         });
-
-        // Szintkülönbség számolása
-        if (_lastAltitude != null && event.altitude != null) {
-          double altitudeChange = event.altitude! - _lastAltitude!;
-          if (altitudeChange > 0) {
-            _elevationGain +=
-                altitudeChange; // Csak a pozitív szintkülönbséget adjuk hozzá
-          }
-        }
-        _lastAltitude = event.altitude; // Aktuális magasság tárolása
-
-        // Kilométer ellenőrzés
-        if (_dist / 1000 > _kmCheckpoint + 1) {
-          _kmCheckpoint += 1;
-
-          // Kilométerenkénti átlagsebesség kiszámítása és hozzáadása a listához
-          double currentAvgSpeed = _calculateCurrentAvgSpeed();
-          _speedsPerKm.add(currentAvgSpeed);
-        }
       }
 
       setState(() {
@@ -103,28 +79,19 @@ class _MapPageState extends State<MapPage> {
             width: 3));
       });
 
-      // Átlagsebesség frissítése
+      // Update average speed
       _updateAverageSpeed();
     });
   }
 
-  // Kilométerenkénti átlagsebesség kiszámítása (min/km)
-  double _calculateCurrentAvgSpeed() {
-    if (_time > 0 && _dist > 0) {
-      double timeInMinutes = _time / (1000 * 60);
-      double distanceInKm = _dist / 1000;
-      return timeInMinutes / distanceInKm;
-    }
-    return 0;
-  }
-
+  // This function calculates the average speed in min/km
   void _updateAverageSpeed() {
     if (_dist > 0 && _time > 0) {
       double timeInMinutes = _time / (1000 * 60);
       double distanceInKm = _dist / 1000;
       _avgSpeed = timeInMinutes / distanceInKm;
     } else {
-      _avgSpeed = 0;
+      _avgSpeed = 0; // Avoid division by zero
     }
   }
 
@@ -212,18 +179,14 @@ class _MapPageState extends State<MapPage> {
                     ),
                     padding: EdgeInsets.all(0),
                     onPressed: () async {
-                      // Entry objektum létrehozása és mentése
+                      // Create the new Entry object with user ID and average speed
                       Entry en = Entry(
                           date:
                               DateFormat.yMMMMd('en_US').format(DateTime.now()),
                           duration: _displayTime,
-                          speed: _avgSpeed, // Átlagsebesség (min/km)
+                          speed: _avgSpeed, // Store average speed in min/km
                           distance: _dist,
-                          elevationGain:
-                              _elevationGain, // Szintkülönbség mentése
-                          speedPerKm:
-                              _speedsPerKm, // Kilométerenkénti sebességek
-                          userId: widget.userId); // User ID hozzáadása
+                          userId: widget.userId); // Pass user ID
                       Navigator.pop(context, en);
                     },
                   )

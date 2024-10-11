@@ -23,94 +23,113 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Register")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Reduce spacing above the first field
-            SizedBox(height: 20),
-            TextField(
-              controller: fullNameController,
-              decoration: InputDecoration(labelText: 'Full Name'),
-            ),
-            TextField(
-              controller: usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            TextField(
-              controller: birthdateController,
-              decoration: InputDecoration(labelText: 'Birthdate (yyyy-mm-dd)'),
-              keyboardType: TextInputType.datetime,
-            ),
-            TextField(
-              controller: heightController,
-              decoration: InputDecoration(labelText: 'Height (cm)'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: weightController,
-              decoration: InputDecoration(labelText: 'Weight (kg)'),
-              keyboardType: TextInputType.number,
-            ),
-            SizedBox(height: 20),
-            // Wrap Gender and Level in a Row for horizontal alignment
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: DropdownButton<String>(
-                    hint: Text('Gender'),
-                    value: gender,
-                    isExpanded: true, // Make it fill the available space
-                    items:
-                        <String>['Male', 'Female', 'Other'].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        gender = newValue;
-                      });
-                    },
+      body: SingleChildScrollView(
+        // Prevent overflow by making the form scrollable
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 20),
+              TextField(
+                controller: fullNameController,
+                decoration: InputDecoration(labelText: 'Full Name'),
+              ),
+              TextField(
+                controller: usernameController,
+                decoration: InputDecoration(labelText: 'Username'),
+              ),
+              TextField(
+                controller: passwordController,
+                decoration: InputDecoration(labelText: 'Password'),
+                obscureText: true,
+              ),
+              TextField(
+                controller: birthdateController,
+                decoration:
+                    InputDecoration(labelText: 'Birthdate (yyyy-mm-dd)'),
+                readOnly: true, // Prevent manual input
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(1900), // Range of the date picker
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    String formattedDate =
+                        "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                    setState(() {
+                      birthdateController.text =
+                          formattedDate; // Assign the selected date
+                    });
+                  }
+                },
+              ),
+              TextField(
+                controller: heightController,
+                decoration: InputDecoration(labelText: 'Height (cm)'),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: weightController,
+                decoration: InputDecoration(labelText: 'Weight (kg)'),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: DropdownButton<String>(
+                      hint: Text('Gender'),
+                      value: gender,
+                      isExpanded: true, // Fill available space
+                      items: <String>['Male', 'Female', 'Other']
+                          .map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          gender = newValue;
+                        });
+                      },
+                    ),
                   ),
-                ),
-                SizedBox(width: 16), // Add spacing between the two dropdowns
-                Expanded(
-                  child: DropdownButton<String>(
-                    hint: Text('Level'),
-                    value: level,
-                    isExpanded: true, // Make it fill the available space
-                    items: <String>['Beginner', 'Intermediate', 'Advanced']
-                        .map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        level = newValue;
-                      });
-                    },
+                  SizedBox(
+                      width: 16), // Spacing between gender and level dropdowns
+                  Expanded(
+                    child: DropdownButton<String>(
+                      hint: Text('Level'),
+                      value: level,
+                      isExpanded: true, // Fill available space
+                      items: <String>['Beginner', 'Intermediate', 'Advanced']
+                          .map((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          level = newValue;
+                        });
+                      },
+                    ),
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: _registerUser,
-              child: Text('Register'),
-            ),
-          ],
+                ],
+              ),
+              SizedBox(height: 30),
+              ElevatedButton(
+                onPressed: _registerUser,
+                child: Text('Register'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -72,4 +72,18 @@ class User {
     }
     return null;
   }
+
+  // Retrieve a User by ID
+  static Future<User?> getUserById(Database db, int userId) async {
+    List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [userId],
+    );
+
+    if (maps.isNotEmpty) {
+      return User.fromMap(maps.first);
+    }
+    return null;
+  }
 }

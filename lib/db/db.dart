@@ -4,7 +4,7 @@ import 'package:path/path.dart' as p;
 
 abstract class DB {
   static Database? _db;
-  static int get _version => 2; // Verziót frissítettük 2-re
+  static int get _version => 1;
 
   // Initialize the database
   static Future<void> init() async {
@@ -12,8 +12,7 @@ abstract class DB {
       String _path = await getDatabasesPath();
       String _dbpath = p.join(_path, 'database.db');
       print('Opening database at path: $_dbpath'); // Debug message
-      _db = await openDatabase(_dbpath,
-          version: _version, onCreate: onCreate, onUpgrade: onUpgrade);
+      _db = await openDatabase(_dbpath, version: _version, onCreate: onCreate);
       print('Database initialized'); // Debug message
     } catch (ex) {
       print('Error initializing database: $ex'); // Debug message
@@ -26,14 +25,12 @@ abstract class DB {
       await db.execute('''
         CREATE TABLE entries (
           id INTEGER PRIMARY KEY NOT NULL,
-          user_id INTEGER,
+          user_id INTEGER,  -- Add this line
           date STRING, 
           duration STRING, 
           speed REAL, 
           distance REAL,
-          elevation_gain REAL,
-          speed_per_km TEXT,
-          FOREIGN KEY(user_id) REFERENCES users(id)
+          FOREIGN KEY(user_id) REFERENCES users(id)  -- Add this line
         )
       ''');
       print('Table "entries" created'); // Debug message
@@ -48,21 +45,12 @@ abstract class DB {
           gender TEXT,
           height REAL,
           weight REAL,
-          level TEXT  -- Új mező a szinthez
+          level TEXT
         )
       ''');
       print('Table "users" created'); // Debug message
     } catch (ex) {
       print('Error creating tables: $ex'); // Debug message
-    }
-  }
-
-  // Upgrade database for version changes
-  static FutureOr<void> onUpgrade(
-      Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      await db.execute(
-          'ALTER TABLE users ADD COLUMN level TEXT DEFAULT "Beginner"');
     }
   }
 
