@@ -22,8 +22,10 @@ class _MapPageState extends State<MapPage> {
   late GoogleMapController _mapController;
   LatLng _center = const LatLng(0, 0);
   List<LatLng> route = [];
+  List<double> _speedsPerKm = []; // Kilométerenkénti sebességek
 
   double _dist = 0;
+  double _kmCheckpoint = 0; // Kilométer checkpoint
   late String _displayTime;
   late int _time;
   double _avgSpeed = 0;
@@ -68,6 +70,15 @@ class _MapPageState extends State<MapPage> {
         setState(() {
           _dist += appendDist;
         });
+
+        // Kilométer ellenőrzés
+        if (_dist / 1000 > _kmCheckpoint + 1) {
+          _kmCheckpoint += 1;
+
+          // Kilométerenkénti átlagsebesség kiszámítása és hozzáadása a listához
+          double currentAvgSpeed = _calculateCurrentAvgSpeed();
+          _speedsPerKm.add(currentAvgSpeed);
+        }
       }
 
       setState(() {
@@ -79,19 +90,28 @@ class _MapPageState extends State<MapPage> {
             width: 3));
       });
 
-      // Update average speed
+      // Átlagsebesség frissítése
       _updateAverageSpeed();
     });
   }
 
-  // This function calculates the average speed in min/km
+  // Kilométerenkénti átlagsebesség kiszámítása (min/km)
+  double _calculateCurrentAvgSpeed() {
+    if (_time > 0 && _dist > 0) {
+      double timeInMinutes = _time / (1000 * 60);
+      double distanceInKm = _dist / 1000;
+      return timeInMinutes / distanceInKm;
+    }
+    return 0;
+  }
+
   void _updateAverageSpeed() {
     if (_dist > 0 && _time > 0) {
       double timeInMinutes = _time / (1000 * 60);
       double distanceInKm = _dist / 1000;
       _avgSpeed = timeInMinutes / distanceInKm;
     } else {
-      _avgSpeed = 0; // Avoid division by zero
+      _avgSpeed = 0;
     }
   }
 
@@ -179,14 +199,26 @@ class _MapPageState extends State<MapPage> {
                     ),
                     padding: EdgeInsets.all(0),
                     onPressed: () async {
-                      // Create the new Entry object with user ID and average speed
+                      // Debug üzenet: a kilométerenkénti sebességek megjelenítése
+                      print('Kilométerenkénti sebességek: $_speedsPerKm');
+                      print('Teljes távolság: $_dist');
+                      print('Átlagos sebesség: $_avgSpeed');
+                      print('Idő kijelző: $_displayTime');
+                      List<double> emergency = [0.0];
                       Entry en = Entry(
-                          date:
-                              DateFormat.yMMMMd('en_US').format(DateTime.now()),
-                          duration: _displayTime,
-                          speed: _avgSpeed, // Store average speed in min/km
-                          distance: _dist,
-                          userId: widget.userId); // Pass user ID
+                        date: DateFormat.yMMMMd('en_US').format(DateTime.now()),
+                        duration: _displayTime,
+                        speed: _avgSpeed,
+                        distance: _dist,
+                        speedPerKm: _dist > 1
+                            ? _speedsPerKm
+                            : emergency, // Ha a távolság 0, akkor a sebesség per km legyen 0.0
+                        userId: widget.userId,
+                      );
+
+                      // Debug üzenet: a létrehozott Entry objektum megjelenítése
+                      print('Létrehozott Entry objektum: ${en.toMap()}');
+
                       Navigator.pop(context, en);
                     },
                   )

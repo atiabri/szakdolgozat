@@ -25,19 +25,34 @@ class _HomePageState extends State<HomePage> {
     _fetchEntries();
   }
 
-  // Fetch run entries filtered by user ID
-  void _fetchEntries() async {
-    List<Map<String, dynamic>> _results =
-        await DB.query(Entry.table, userId: widget.currentUserId);
-    setState(() {
-      _data = _results.map((item) => Entry.fromMap(item)).toList();
-    });
+  void _addEntries(Entry en) async {
+    // Debug üzenet: a beszúrandó entry megjelenítése
+    print('A beszúrandó Entry objektum: ${en.toMap()}');
+
+    int result = await DB.insert(Entry.table, en.toMap());
+
+    // Debug üzenet a beszúrás eredményéről
+    print('Beszúrás eredménye: $result');
+
+    _fetchEntries(); // A bejegyzések frissítése beszúrás után
   }
 
-  // Add a new entry and refresh the list
-  void _addEntries(Entry en) async {
-    await DB.insert(Entry.table, en.toMap());
-    _fetchEntries();
+// A futásbejegyzések lekérdezése a felhasználó azonosítója alapján
+  void _fetchEntries() async {
+    print('Bejegyzések lekérdezése a user_id alapján: ${widget.currentUserId}');
+
+    List<Map<String, dynamic>> _results =
+        await DB.query(Entry.table, userId: widget.currentUserId);
+
+    // Debug üzenet: a lekérdezés eredményének megjelenítése
+    print('Lekérdezés eredménye: $_results');
+
+    setState(() {
+      _data = _results.map((item) => Entry.fromMap(item)).toList();
+
+      // Debug üzenet: az Entry objektumok leképezése után
+      print('Leképezett Entries objektumok: $_data');
+    });
   }
 
   // Navigation for bottom navigation bar

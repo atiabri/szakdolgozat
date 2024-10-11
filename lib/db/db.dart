@@ -30,6 +30,7 @@ abstract class DB {
           duration STRING, 
           speed REAL, 
           distance REAL,
+          speed_per_km TEXT,
           FOREIGN KEY(user_id) REFERENCES users(id)  -- Add this line
         )
       ''');
@@ -63,28 +64,38 @@ abstract class DB {
     return _db!;
   }
 
-  // Query data from a table
+  // Adatok beszúrása egy táblába
+  static Future<int> insert(String table, Map<String, dynamic> item) async {
+    final db = await getDatabase();
+
+    // Debug üzenet: a beszúrandó elem megjelenítése
+    print('Inserting into table: $table, Item: $item');
+
+    int result = await db.insert(table, item,
+        conflictAlgorithm: ConflictAlgorithm.replace);
+
+    // Debug üzenet: a beszúrás eredményének ellenőrzése
+    print('Insert result: $result');
+
+    return result;
+  }
+
+// Adatok lekérdezése egy táblából
   static Future<List<Map<String, dynamic>>> query(String table,
       {int? userId}) async {
     final db = await getDatabase();
-    print('Querying table: $table'); // Debug message
+
+    // Debug üzenet: a lekérdezés és szűrő megjelenítése
+    print('Querying table: $table for user_id: $userId');
+
     if (userId != null) {
       return await db.query(
         table,
         where: 'user_id = ?',
-        whereArgs: [userId], // Filter by user_id
+        whereArgs: [userId], // Szűrés user_id alapján
       );
     } else {
       return await db.query(table);
     }
-  }
-
-  // Insert data into a table
-  static Future<int> insert(String table, Map<String, dynamic> item) async {
-    final db = await getDatabase();
-    print('Inserting into table: $table'); // Debug message
-    print('Item: $item'); // Debug message
-    return await db.insert(table, item,
-        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 }
