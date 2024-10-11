@@ -30,6 +30,10 @@ class _MapPageState extends State<MapPage> {
   late int _time;
   double _avgSpeed = 0;
 
+  // Új változók a magasságnövekedéshez
+  double _elevationGain = 0; // Teljes magasságnövekedés
+  double? _previousAltitude; // Az előző mérési pont magassága
+
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
 
   @override
@@ -79,7 +83,18 @@ class _MapPageState extends State<MapPage> {
           double currentAvgSpeed = _calculateCurrentAvgSpeed();
           _speedsPerKm.add(currentAvgSpeed);
         }
+
+        // Magasságváltozás ellenőrzése
+        if (_previousAltitude != null && event.altitude != null) {
+          double altitudeChange = event.altitude! - _previousAltitude!;
+          if (altitudeChange > 0) {
+            _elevationGain += altitudeChange; // Magasságnövekedés frissítése
+          }
+        }
       }
+
+      // Előző magasság frissítése
+      _previousAltitude = event.altitude;
 
       setState(() {
         route.add(loc);
@@ -210,6 +225,8 @@ class _MapPageState extends State<MapPage> {
                         duration: _displayTime,
                         speed: _avgSpeed,
                         distance: _dist,
+                        elevationGain:
+                            _elevationGain, // Magasságnövekedés mentése
                         speedPerKm: _dist > 1
                             ? _speedsPerKm
                             : emergency, // Ha a távolság 0, akkor a sebesség per km legyen 0.0

@@ -31,6 +31,7 @@ abstract class DB {
           speed REAL, 
           distance REAL,
           speed_per_km TEXT,
+          elevation_gain REAL,
           FOREIGN KEY(user_id) REFERENCES users(id)  -- Add this line
         )
       ''');

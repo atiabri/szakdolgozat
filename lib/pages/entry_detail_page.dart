@@ -15,6 +15,7 @@ Date: ${entry.date}
 Distance: ${(entry.distance / 1000).toStringAsFixed(2)} km
 Duration: ${entry.duration}
 Speed: ${entry.speed.toStringAsFixed(2)} perc/km
+Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
 ''';
 
     Share.share(content, subject: 'Run Details');
@@ -165,6 +166,18 @@ Speed: ${entry.speed.toStringAsFixed(2)} perc/km
                         Icon(Icons.speed, color: Colors.purple),
                         SizedBox(width: 8),
                         Text('Speed: ${entry.speed.toStringAsFixed(2)} perc/km',
+                            style: TextStyle(fontSize: 18)),
+                      ],
+                    ),
+                    SizedBox(height: 10),
+                    // Új sor a magasság megjelenítésére
+                    Row(
+                      children: [
+                        Icon(Icons.terrain,
+                            color: Colors.purple), // Megváltoztatott ikon
+                        SizedBox(width: 8),
+                        Text(
+                            'Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m',
                             style: TextStyle(fontSize: 18)),
                       ],
                     ),
