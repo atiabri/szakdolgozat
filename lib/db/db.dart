@@ -184,6 +184,9 @@ abstract class DB {
         int minutes = int.parse(durationParts[0]);
         int seconds = int.parse(durationParts[1]);
         totalDuration += minutes + (seconds / 60.0); // Convert to minutes
+      } else {
+        print('Duration data missing or incorrect for entry: $entry');
+        totalDuration += 1.0; // Add minimum duration of 1 minute
       }
     }
 
