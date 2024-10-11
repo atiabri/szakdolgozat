@@ -23,6 +23,7 @@ abstract class DB {
   // Create tables
   static FutureOr<void> onCreate(Database db, int version) async {
     try {
+      print('Creating table "entries"'); // Debug message
       await db.execute('''
         CREATE TABLE entries ( 
           id INTEGER PRIMARY KEY NOT NULL, 
@@ -36,9 +37,9 @@ abstract class DB {
           FOREIGN KEY(user_id) REFERENCES users(id) 
         ) 
       ''');
-
       print('Table "entries" created'); // Debug message
 
+      print('Creating table "users"'); // Debug message
       await db.execute('''
         CREATE TABLE users ( 
           id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -52,7 +53,6 @@ abstract class DB {
           level TEXT 
         ) 
       ''');
-
       print('Table "users" created'); // Debug message
     } catch (ex) {
       print('Error creating tables: $ex'); // Debug message
@@ -93,21 +93,44 @@ abstract class DB {
     print('Querying table: $table for user_id: $userId');
 
     if (userId != null) {
-      return await db.query(
-        table,
-        where: 'user_id = ?',
-        whereArgs: [userId], // Filter by user_id
-      );
+      try {
+        String column = table == 'users'
+            ? 'id'
+            : 'user_id'; // Use 'id' for users table, 'user_id' for others
+        List<Map<String, dynamic>> results = await db.query(
+          table,
+          where: '$column = ?',
+          whereArgs: [userId], // Filter by correct column
+        );
+        print(
+            'Query successful, retrieved ${results.length} records'); // Debug message
+        return results;
+      } catch (ex) {
+        print(
+            'Error during query for user_id: $userId, Error: $ex'); // Debug message
+        return [];
+      }
     } else {
-      return await db.query(table);
+      try {
+        List<Map<String, dynamic>> results = await db.query(table);
+        print(
+            'Query successful, retrieved ${results.length} records'); // Debug message
+        return results;
+      } catch (ex) {
+        print(
+            'Error during query for table: $table, Error: $ex'); // Debug message
+        return [];
+      }
     }
   }
 
   // Get input data for user
   static Future<List<double>> getInputData(int userId) async {
+    print('Fetching input data for userId: $userId'); // Debug message
     List<Map<String, dynamic>> userResult =
         await DB.query('users', userId: userId);
     if (userResult.isEmpty) {
+      print('No user data found for userId: $userId'); // Debug message
       return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
     }
 
@@ -124,12 +147,16 @@ abstract class DB {
       age--;
     }
 
+    print(
+        'User data: Age=$age, Weight=$weight, Height=$height, Gender=$gender'); // Debug message
+
     // Get workout data
     List<Map<String, dynamic>> results =
         await DB.query('entries', userId: userId);
     List<Entry> entries = results.map((item) => Entry.fromMap(item)).toList();
 
     if (entries.isEmpty) {
+      print('No workout data found for userId: $userId'); // Debug message
       return [
         age.toDouble(), // Age
         weight, // Weight (kg)
@@ -147,6 +174,7 @@ abstract class DB {
     double totalDuration = 0.0;
 
     for (var entry in entries) {
+      print('Processing entry: $entry'); // Debug message
       totalSpeed += entry.speed;
       totalDistance += entry.distance;
 
@@ -163,6 +191,9 @@ abstract class DB {
     double avgDistance = totalDistance / entries.length;
     double avgDuration = totalDuration / entries.length;
 
+    print(
+        'Averages calculated - Speed: $avgSpeed, Distance: $avgDistance, Duration: $avgDuration'); // Debug message
+
     return [
       age.toDouble(), // Age
       weight, // Weight (kg)
@@ -177,6 +208,7 @@ abstract class DB {
 
   // Numeric encoding of level
   static int _getLevelNumeric(String level) {
+    print('Converting user level to numeric: $level'); // Debug message
     switch (level.toLowerCase()) {
       case 'beginner':
         return 0;
@@ -185,6 +217,7 @@ abstract class DB {
       case 'advanced':
         return 2;
       default:
+        print('Unknown level: $level'); // Debug message
         return -1; // If the level is unknown
     }
   }

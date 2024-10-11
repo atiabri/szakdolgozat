@@ -3,9 +3,9 @@ import 'fitness_ai.dart';
 import 'package:onlab_final/db/db.dart';
 
 class AiPage extends StatefulWidget {
-  final int userId; // userID fogadása az AiPage-ben
+  final int userId;
 
-  AiPage({required this.userId}); // Konstruktor, amely fogadja a userID-t
+  AiPage({required this.userId});
 
   @override
   _AiPageState createState() => _AiPageState();
@@ -13,17 +13,17 @@ class AiPage extends StatefulWidget {
 
 class _AiPageState extends State<AiPage> {
   final FitnessAI _fitnessAI = FitnessAI();
-  List<Widget> _messages = []; // List to hold chat messages
+  List<Widget> _messages = [];
 
   @override
   void initState() {
     super.initState();
+    print("Initializing AI page for user ID: ${widget.userId}"); // Debug
     _fitnessAI.loadModel();
-    _initializeMessages(); // Initialize messages with default values
-    _loadUserData(); // Felhasználói adatok betöltése
+    _initializeMessages();
+    _loadUserData();
   }
 
-  // Initialize default chat messages
   void _initializeMessages() {
     _messages.add(
       Padding(
@@ -31,7 +31,7 @@ class _AiPageState extends State<AiPage> {
         child: Align(
           alignment: Alignment.centerRight,
           child: Container(
-            constraints: BoxConstraints(maxWidth: 250), // Narrower user message
+            constraints: BoxConstraints(maxWidth: 250),
             padding: EdgeInsets.all(10.0),
             decoration: BoxDecoration(
               color: Colors.blue[200],
@@ -52,7 +52,7 @@ class _AiPageState extends State<AiPage> {
         child: Align(
           alignment: Alignment.centerLeft,
           child: Container(
-            constraints: BoxConstraints(maxWidth: 250), // Narrower AI message
+            constraints: BoxConstraints(maxWidth: 250),
             padding: EdgeInsets.all(10.0),
             decoration: BoxDecoration(
               color: Colors.grey[300],
@@ -68,33 +68,65 @@ class _AiPageState extends State<AiPage> {
     );
   }
 
-  // Felhasználói adatok lekérdezése és AI futtatása
   void _loadUserData() async {
-    List<double> inputData =
-        await DB.getInputData(widget.userId); // Statikus hívás
-    print("Input Data: $inputData"); // Debug statement
+    print("Loading user data for user ID: ${widget.userId}"); // Debug
+    List<double> inputData = await DB.getInputData(widget.userId);
+    print("Input Data: $inputData"); // Debug
 
     if (inputData.isNotEmpty) {
       _makePrediction(inputData);
     } else {
+      print("No input data available for user ID: ${widget.userId}"); // Debug
       _addMessage("No input data found.", false);
     }
   }
 
-  // AI predikció készítése és edzésterv generálása
   void _makePrediction(List<double> inputData) {
+    print("Making prediction with input data: $inputData"); // Debug
     List<dynamic> result = _fitnessAI.predict(inputData);
     double fitnessScore = result[0];
-    print("Predicted Fitness Score: $fitnessScore"); // Debug statement
+    print("Predicted Fitness Score: $fitnessScore"); // Debug
 
     String trainingPlan = _generateTrainingPlan(fitnessScore);
 
-    // Add AI response with the generated training plan
     _addMessage(trainingPlan, false);
+
+    if (fitnessScore > 0) {
+      print("Valid fitness score found, updating AI message."); // Debug
+      setState(() {
+        _messages.removeAt(1);
+        _messages.insert(
+          1,
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                constraints: BoxConstraints(maxWidth: 250),
+                padding: EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                child: Text(
+                  "Here is your recommended training plan based on your fitness level!",
+                  style: TextStyle(fontSize: 16.0),
+                ),
+              ),
+            ),
+          ),
+        );
+      });
+    } else {
+      print(
+          "Fitness score is zero or negative, not updating AI message."); // Debug
+    }
   }
 
-  // Edzésterv generálása a fitness pontszám alapján
   String _generateTrainingPlan(double fitnessScore) {
+    print(
+        "Generating training plan based on fitness score: $fitnessScore"); // Debug
     String trainingPlan;
 
     if (fitnessScore < 25) {
@@ -135,20 +167,20 @@ class _AiPageState extends State<AiPage> {
           'Sunday: 1 hour of hiking or outdoor sports\n';
     }
 
+    print("Generated training plan: $trainingPlan"); // Debug
     return trainingPlan;
   }
 
-  // Method to add messages to the chat
   void _addMessage(String message, bool isUser) {
     setState(() {
+      print("Adding message: $message, isUser: $isUser"); // Debug
       _messages.add(
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
           child: Align(
             alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
             child: Container(
-              constraints: BoxConstraints(
-                  maxWidth: 250), // Adjust width for both messages
+              constraints: BoxConstraints(maxWidth: 250),
               padding: EdgeInsets.all(10.0),
               decoration: BoxDecoration(
                 color: isUser ? Colors.blue[200] : Colors.grey[300],
@@ -167,6 +199,7 @@ class _AiPageState extends State<AiPage> {
 
   @override
   void dispose() {
+    print("Disposing FitnessAI instance."); // Debug
     _fitnessAI.dispose();
     super.dispose();
   }

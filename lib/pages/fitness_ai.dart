@@ -4,43 +4,43 @@ import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
 class FitnessAI {
   Interpreter? _interpreter;
 
-  // A modell betöltése
   Future<void> loadModel() async {
     try {
+      print('Loading AI model...'); // Debug
       _interpreter = await Interpreter.fromAsset('fitness_level_model.tflite');
-      print('Model successfully loaded.');
+      print('Model successfully loaded.'); // Debug
     } catch (e) {
-      print('Error loading model: $e');
+      print('Error loading model: $e'); // Debug
     }
   }
 
-  // Prediction metódus, amely bemeneti adatokat és fitness pontszámot ad vissza
   List<dynamic> predict(List<dynamic> inputData) {
-    // Input validálása
-    if (inputData.length != 5) {
-      throw Exception('Input data must have exactly 5 elements.');
+    print('Running AI prediction...'); // Debug
+    if (inputData.length != 8) {
+      print(
+          'Invalid input data length. Expected 8, but got ${inputData.length}'); // Debug
+      throw Exception('Input data must have exactly 8 elements.');
     }
 
-    var input = TensorBuffer.createFixedSize([1, 5], TfLiteType.float32);
-
-    // Providing shape argument to loadList
-    input.loadList(inputData, shape: [1, 5]);
-
+    var input = TensorBuffer.createFixedSize([1, 8], TfLiteType.float32);
+    input.loadList(inputData, shape: [1, 8]);
     var output = TensorBuffer.createFixedSize([1, 1], TfLiteType.float32);
 
-    // Futtatjuk a predikciót
     try {
       _interpreter?.run(input.buffer, output.buffer);
+      print('Prediction successful.'); // Debug
     } catch (e) {
-      print('Error during prediction: $e');
-      return [0.0]; // Returning a default value on error
+      print('Error during prediction: $e'); // Debug
+      return [0.0];
     }
 
-    // Eredmény lekérése
-    return output.getDoubleList();
+    double result = output.getDoubleList()[0];
+    print('Predicted result: $result'); // Debug
+    return [result];
   }
 
   void dispose() {
+    print('Disposing AI model'); // Debug
     _interpreter?.close();
   }
 }
