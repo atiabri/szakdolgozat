@@ -4,7 +4,7 @@ import 'package:onlab_final/model/entry.dart';
 import 'package:onlab_final/pages/maps.dart';
 import 'package:onlab_final/widgets/entry_card.dart';
 import 'package:onlab_final/pages/activity_chart.dart'; // Import the new page
-import 'package:onlab_final/pages/empty_page.dart'; // Import the empty page
+import 'package:onlab_final/pages/ai_page.dart'; // Import the empty page
 
 class HomePage extends StatefulWidget {
   final int currentUserId; // Pass current user ID to HomePage
@@ -73,7 +73,8 @@ class _HomePageState extends State<HomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => EmptyPage(),
+          builder: (context) =>
+              AiPage(userId: widget.currentUserId), // userID átadása
         ),
       );
     }
