@@ -15,6 +15,7 @@ class _AiPageState extends State<AiPage> {
   final FitnessAI _fitnessAI = FitnessAI();
   List<Widget> _messages = [];
   String _trainingPlan = ""; // Állapotváltozó az edzéstervhez
+  double _fitnessScore = 0.0; // Állapotváltozó a fitness score-nak
 
   @override
   void initState() {
@@ -25,7 +26,6 @@ class _AiPageState extends State<AiPage> {
   }
 
   void _initializeMessages() {
-    // Debugging: Kezdeti üzenet inicializálás
     print("Initializing default AI conversation messages.");
 
     _messages.add(
@@ -70,22 +70,18 @@ class _AiPageState extends State<AiPage> {
       ),
     );
 
-    // Debugging: Kezdeti üzenetek hozzáadása kész
     print("Initial messages added to the conversation.");
   }
 
   void _loadUserData() async {
-    // Debugging: Jelezd, hogy elkezdődött az adatlekérdezés
     print("Fetching input data for userId: ${widget.userId}");
 
     List<double> inputData = await DB.getInputData(widget.userId);
 
     if (inputData.isNotEmpty) {
-      // Debugging: Ha van adat, futtatjuk a predikciót
       print("Input data retrieved: $inputData");
       _makePrediction(inputData);
     } else {
-      // Debugging: Nincs adat, hibaüzenet hozzáadása az üzenetlistához
       print("No input data found for user.");
       _addMessage("No input data found.", false);
     }
@@ -94,44 +90,35 @@ class _AiPageState extends State<AiPage> {
   void _makePrediction(List<double> inputData) async {
     List<double> doubleInputData = inputData.map((d) => d.toDouble()).toList();
 
-    // Debugging: Jelezd a konzolnak, hogy elkezdődött a predikció
     print("Running prediction with input data: $doubleInputData");
 
-    // Fut a predikció, most várunk az eredményre
     List<dynamic> result = await _fitnessAI.predict(doubleInputData);
 
-    // Debugging: Írd ki a predikció eredményét
     print("Prediction result: $result");
 
     double fitnessScore;
     if (result.isNotEmpty && result[0] != null) {
       fitnessScore = result[0];
     } else {
-      // Debugging: Hibás eredmény, ezért alapértelmezett érték
       print(
           "No valid prediction result, setting fitnessScore to default (1.0)");
       fitnessScore = 1.0;
     }
 
-    // Debugging: Fitness score ellenőrzés, ha nullát kapunk, akkor legalább 1.0 legyen
     if (fitnessScore == 0.0) {
       fitnessScore = 1.0;
     }
 
-    // Debugging: Jelezd a számított fitness score-t
     print("Calculated fitness score: $fitnessScore");
 
     String trainingPlan = _generateTrainingPlan(fitnessScore);
 
-    // Debugging: Jelezd, hogy most frissül az UI
-    print("Updating UI with new training plan.");
-
-    // Ellenőrizzük, hogy a widget még él-e, és frissítjük az UI-t
     if (mounted) {
       setState(() {
         print("UI state is being updated.");
 
-        // Az UI frissítése, eltávolítjuk a második üzenetet és hozzáadjuk az újat
+        _fitnessScore = fitnessScore; // Fitness score mentése
+
         _messages.removeAt(1);
         _messages.insert(
           1,
@@ -148,7 +135,7 @@ class _AiPageState extends State<AiPage> {
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: Text(
-                  "Based on the analysis, I believe this training plan will be the most beneficial for you. I hope it serves you well!",
+                  "Based on the analysis, I believe this training plan will be the most beneficial for you. Your fitness score is: ${_fitnessScore.toStringAsFixed(2)}",
                   style: TextStyle(fontSize: 16.0),
                 ),
               ),
@@ -156,11 +143,9 @@ class _AiPageState extends State<AiPage> {
           ),
         );
 
-        // Frissítjük az edzéstervet
         _trainingPlan = trainingPlan;
       });
     } else {
-      // Debugging: Ha a widget már nem él, jelezd ezt a konzolba
       print("UI not mounted, state cannot be updated.");
     }
   }
@@ -280,11 +265,8 @@ class _AiPageState extends State<AiPage> {
           SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              // Debugging: Jelezd, hogy a frissítési gomb meg lett nyomva
               print(
                   "Refresh button pressed, reloading user data and running prediction.");
-
-              // Frissítjük az adatokat és futtatjuk a predikciót
               _loadUserData();
             },
             child: Text('Refresh Prediction'),
