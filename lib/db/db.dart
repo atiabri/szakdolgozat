@@ -124,23 +124,29 @@ abstract class DB {
     }
   }
 
-  // Get input data for user
+  // Normalizáló függvény (StandardScaler logika alapján)
+  static double standardize(double value, double mean, double stdDev) {
+    return (value - mean) / stdDev;
+  }
+
+  // Get input data for AI prediction
   static Future<List<double>> getInputData(int userId) async {
     print('Fetching input data for userId: $userId'); // Debug message
     List<Map<String, dynamic>> userResult =
         await DB.query('users', userId: userId);
+
     if (userResult.isEmpty) {
       print('No user data found for userId: $userId'); // Debug message
-      return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+      return [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
     }
 
     Map<String, dynamic> userData = userResult.first;
     DateTime birthDate = DateTime.parse(userData['birth_date']);
     double weight = userData['weight'];
     double height = userData['height'];
-    int gender = userData['gender'] == 'male' ? 1 : 0;
+    int gender = userData['gender'] == 'Male' ? 1 : 0;
 
-    // Calculate age from birth date
+    // Calculate age
     int age = DateTime.now().year - birthDate.year;
     if (DateTime.now().isBefore(
         DateTime(DateTime.now().year, birthDate.month, birthDate.day))) {
@@ -150,7 +156,7 @@ abstract class DB {
     print(
         'User data: Age=$age, Weight=$weight, Height=$height, Gender=$gender'); // Debug message
 
-    // Get workout data
+    // Fetch workout data
     List<Map<String, dynamic>> results =
         await DB.query('entries', userId: userId);
     List<Entry> entries = results.map((item) => Entry.fromMap(item)).toList();
@@ -158,35 +164,43 @@ abstract class DB {
     if (entries.isEmpty) {
       print('No workout data found for userId: $userId'); // Debug message
       return [
-        age.toDouble(), // Age
-        weight, // Weight (kg)
-        height, // Height (cm)
+        standardize(age.toDouble(), meanAge, stdDevAge), // Standardized age
+        standardize(
+            weight, meanWeight, stdDevWeight), // Standardized weight (kg)
+        standardize(
+            height, meanHeight, stdDevHeight), // Standardized height (cm)
+        gender.toDouble(), // Gender (female: 0, male: 1)
+        _getLevelNumeric(userData['level'])
+            .toDouble(), // Level encoded numerically
         0.0, // Average speed (min/km)
         0.0, // Average distance (km)
-        0.0, // Average duration (min)
-        gender.toDouble(), // Gender (female: 0, male: 1)
-        _getLevelNumeric(userData['level']).toDouble() // Level numerically
+        0.0 // Average duration (seconds)
       ];
     }
 
+    // Summing speed, distance, and duration for averaging
     double totalSpeed = 0.0;
     double totalDistance = 0.0;
     double totalDuration = 0.0;
 
     for (var entry in entries) {
-      print('Processing entry: $entry'); // Debug message
       totalSpeed += entry.speed;
       totalDistance += entry.distance;
 
-      // Convert duration String to minutes
+      // Convert duration from "HH:MM:SS" format to seconds
       var durationParts = entry.duration.split(':');
-      if (durationParts.length == 2) {
+      if (durationParts.length == 3) {
+        int hours = int.parse(durationParts[0]);
+        int minutes = int.parse(durationParts[1]);
+        int seconds = int.parse(durationParts[2]);
+        totalDuration += (hours * 3600) + (minutes * 60) + seconds;
+      } else if (durationParts.length == 2) {
         int minutes = int.parse(durationParts[0]);
         int seconds = int.parse(durationParts[1]);
-        totalDuration += minutes + (seconds / 60.0); // Convert to minutes
+        totalDuration += (minutes * 60) + seconds;
       } else {
-        print('Duration data missing or incorrect for entry: $entry');
-        totalDuration += 1.0; // Add minimum duration of 1 minute
+        print('Invalid duration format for entry: $entry');
+        totalDuration += 60.0; // Default to 1 minute if invalid
       }
     }
 
@@ -198,30 +212,51 @@ abstract class DB {
         'Averages calculated - Speed: $avgSpeed, Distance: $avgDistance, Duration: $avgDuration'); // Debug message
 
     return [
-      age.toDouble(), // Age
-      weight, // Weight (kg)
-      height, // Height (cm)
-      avgSpeed, // Average speed (min/km)
-      avgDistance, // Average distance (km)
-      avgDuration, // Average duration (min)
+      standardize(age.toDouble(), meanAge, stdDevAge), // Standardized age
+      standardize(weight, meanWeight, stdDevWeight), // Standardized weight (kg)
+      standardize(height, meanHeight, stdDevHeight), // Standardized height (cm)
       gender.toDouble(), // Gender (female: 0, male: 1)
-      _getLevelNumeric(userData['level']).toDouble() // Level numerically
+      _getLevelNumeric(userData['level'])
+          .toDouble(), // Level encoded numerically
+      standardize(avgSpeed, meanSpeed,
+          stdDevSpeed), // Standardized average speed (min/km)
+      standardize(avgDistance / 1000, meanDistance,
+          stdDevDistance), // Standardized average distance (km)
+      standardize(avgDuration, meanDuration,
+          stdDevDuration) // Standardized average duration (seconds)
     ];
   }
 
-  // Numeric encoding of level
+  // Frissített statisztikai értékek a standardizáláshoz
+  static const double meanAge = 39.11;
+  static const double stdDevAge = 12.10;
+
+  static const double meanWeight = 74.99;
+  static const double stdDevWeight = 14.53;
+
+  static const double meanHeight = 174.45;
+  static const double stdDevHeight = 6.42;
+
+  static const double meanSpeed = 6.58; // Min/km
+  static const double stdDevSpeed = 1.20; // Min/km
+
+  static const double meanDistance = 5.15; // Km
+  static const double stdDevDistance = 1.77; // Km
+
+  static const double meanDuration = 30.0 * 60; // 30 minutes in seconds
+  static const double stdDevDuration = 60.0 * 60; // 1 hour in seconds
+
+  // Helper method to convert user level to a numeric value
   static int _getLevelNumeric(String level) {
-    print('Converting user level to numeric: $level'); // Debug message
-    switch (level.toLowerCase()) {
-      case 'beginner':
-        return 0;
-      case 'intermediate':
+    switch (level) {
+      case 'Beginner':
         return 1;
-      case 'advanced':
+      case 'Intermediate':
         return 2;
+      case 'Advanced':
+        return 3;
       default:
-        print('Unknown level: $level'); // Debug message
-        return -1; // If the level is unknown
+        return 0; // Unknown level
     }
   }
 }

@@ -14,17 +14,20 @@ class AiPage extends StatefulWidget {
 class _AiPageState extends State<AiPage> {
   final FitnessAI _fitnessAI = FitnessAI();
   List<Widget> _messages = [];
+  String _trainingPlan = ""; // Állapotváltozó az edzéstervhez
 
   @override
   void initState() {
     super.initState();
-    print("Initializing AI page for user ID: ${widget.userId}"); // Debug
     _fitnessAI.loadModel();
     _initializeMessages();
     _loadUserData();
   }
 
   void _initializeMessages() {
+    // Debugging: Kezdeti üzenet inicializálás
+    print("Initializing default AI conversation messages.");
+
     _messages.add(
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
@@ -66,34 +69,69 @@ class _AiPageState extends State<AiPage> {
         ),
       ),
     );
+
+    // Debugging: Kezdeti üzenetek hozzáadása kész
+    print("Initial messages added to the conversation.");
   }
 
   void _loadUserData() async {
-    print("Loading user data for user ID: ${widget.userId}"); // Debug
+    // Debugging: Jelezd, hogy elkezdődött az adatlekérdezés
+    print("Fetching input data for userId: ${widget.userId}");
+
     List<double> inputData = await DB.getInputData(widget.userId);
-    print("Input Data: $inputData"); // Debug
 
     if (inputData.isNotEmpty) {
+      // Debugging: Ha van adat, futtatjuk a predikciót
+      print("Input data retrieved: $inputData");
       _makePrediction(inputData);
     } else {
-      print("No input data available for user ID: ${widget.userId}"); // Debug
+      // Debugging: Nincs adat, hibaüzenet hozzáadása az üzenetlistához
+      print("No input data found for user.");
       _addMessage("No input data found.", false);
     }
   }
 
-  void _makePrediction(List<double> inputData) {
-    print("Making prediction with input data: $inputData"); // Debug
-    List<dynamic> result = _fitnessAI.predict(inputData);
-    double fitnessScore = result[0];
-    print("Predicted Fitness Score: $fitnessScore"); // Debug
+  void _makePrediction(List<double> inputData) async {
+    List<double> doubleInputData = inputData.map((d) => d.toDouble()).toList();
+
+    // Debugging: Jelezd a konzolnak, hogy elkezdődött a predikció
+    print("Running prediction with input data: $doubleInputData");
+
+    // Fut a predikció, most várunk az eredményre
+    List<dynamic> result = await _fitnessAI.predict(doubleInputData);
+
+    // Debugging: Írd ki a predikció eredményét
+    print("Prediction result: $result");
+
+    double fitnessScore;
+    if (result.isNotEmpty && result[0] != null) {
+      fitnessScore = result[0];
+    } else {
+      // Debugging: Hibás eredmény, ezért alapértelmezett érték
+      print(
+          "No valid prediction result, setting fitnessScore to default (1.0)");
+      fitnessScore = 1.0;
+    }
+
+    // Debugging: Fitness score ellenőrzés, ha nullát kapunk, akkor legalább 1.0 legyen
+    if (fitnessScore == 0.0) {
+      fitnessScore = 1.0;
+    }
+
+    // Debugging: Jelezd a számított fitness score-t
+    print("Calculated fitness score: $fitnessScore");
 
     String trainingPlan = _generateTrainingPlan(fitnessScore);
 
-    _addMessage(trainingPlan, false);
+    // Debugging: Jelezd, hogy most frissül az UI
+    print("Updating UI with new training plan.");
 
-    if (fitnessScore > 0) {
-      print("Valid fitness score found, updating AI message."); // Debug
+    // Ellenőrizzük, hogy a widget még él-e, és frissítjük az UI-t
+    if (mounted) {
       setState(() {
+        print("UI state is being updated.");
+
+        // Az UI frissítése, eltávolítjuk a második üzenetet és hozzáadjuk az újat
         _messages.removeAt(1);
         _messages.insert(
           1,
@@ -110,36 +148,37 @@ class _AiPageState extends State<AiPage> {
                   borderRadius: BorderRadius.circular(10.0),
                 ),
                 child: Text(
-                  "Here is your recommended training plan based on your fitness level!",
+                  "Based on the analysis, I believe this training plan will be the most beneficial for you. I hope it serves you well!",
                   style: TextStyle(fontSize: 16.0),
                 ),
               ),
             ),
           ),
         );
+
+        // Frissítjük az edzéstervet
+        _trainingPlan = trainingPlan;
       });
     } else {
-      print(
-          "Fitness score is zero or negative, not updating AI message."); // Debug
+      // Debugging: Ha a widget már nem él, jelezd ezt a konzolba
+      print("UI not mounted, state cannot be updated.");
     }
   }
 
   String _generateTrainingPlan(double fitnessScore) {
-    print(
-        "Generating training plan based on fitness score: $fitnessScore"); // Debug
     String trainingPlan;
 
     if (fitnessScore < 25) {
-      trainingPlan = 'Training Plan (0-25 Points):\n\n'
-          'Monday: 30 minutes of brisk walking\n'
+      trainingPlan = 'Training Plan:\n\n'
+          'Monday: 30 minutes of jogging\n'
           'Tuesday: Rest\n'
-          'Wednesday: 30 minutes of light stretching\n'
-          'Thursday: Rest\n'
+          'Wednesday: 30 minutes of cycling\n'
+          'Thursday: Strength training for 30 minutes\n'
           'Friday: 20 minutes of yoga\n'
           'Saturday: Rest\n'
-          'Sunday: 30 minutes of walking\n';
+          'Sunday: 30 minutes of running\n';
     } else if (fitnessScore < 50) {
-      trainingPlan = 'Training Plan (25-50 Points):\n\n'
+      trainingPlan = 'Training Plan:\n\n'
           'Monday: 40 minutes of jogging\n'
           'Tuesday: Strength training for 30 minutes\n'
           'Wednesday: 30 minutes of cycling\n'
@@ -148,7 +187,7 @@ class _AiPageState extends State<AiPage> {
           'Saturday: 20 minutes of yoga\n'
           'Sunday: 30 minutes of brisk walking\n';
     } else if (fitnessScore < 75) {
-      trainingPlan = 'Training Plan (50-75 Points):\n\n'
+      trainingPlan = 'Training Plan:\n\n'
           'Monday: 45 minutes of running\n'
           'Tuesday: Strength training for 45 minutes\n'
           'Wednesday: 30 minutes of cycling\n'
@@ -157,7 +196,7 @@ class _AiPageState extends State<AiPage> {
           'Saturday: 30 minutes of yoga\n'
           'Sunday: 1 hour of hiking\n';
     } else {
-      trainingPlan = 'Training Plan (75-100 Points):\n\n'
+      trainingPlan = 'Training Plan:\n\n'
           'Monday: 1 hour of running\n'
           'Tuesday: Strength training for 1 hour\n'
           'Wednesday: 45 minutes of cycling\n'
@@ -167,13 +206,11 @@ class _AiPageState extends State<AiPage> {
           'Sunday: 1 hour of hiking or outdoor sports\n';
     }
 
-    print("Generated training plan: $trainingPlan"); // Debug
     return trainingPlan;
   }
 
   void _addMessage(String message, bool isUser) {
     setState(() {
-      print("Adding message: $message, isUser: $isUser"); // Debug
       _messages.add(
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
@@ -199,7 +236,6 @@ class _AiPageState extends State<AiPage> {
 
   @override
   void dispose() {
-    print("Disposing FitnessAI instance."); // Debug
     _fitnessAI.dispose();
     super.dispose();
   }
@@ -216,12 +252,41 @@ class _AiPageState extends State<AiPage> {
         children: [
           Expanded(
             child: ListView(
-              children: _messages,
+              children: [
+                ..._messages,
+                // Itt jelenítjük meg az edzéstervet
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 10.0, horizontal: 15.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      constraints: BoxConstraints(maxWidth: 250),
+                      padding: EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(10.0),
+                      ),
+                      child: Text(
+                        _trainingPlan, // A trainingPlan itt jelenik meg
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           SizedBox(height: 20),
           ElevatedButton(
-            onPressed: _loadUserData,
+            onPressed: () {
+              // Debugging: Jelezd, hogy a frissítési gomb meg lett nyomva
+              print(
+                  "Refresh button pressed, reloading user data and running prediction.");
+
+              // Frissítjük az adatokat és futtatjuk a predikciót
+              _loadUserData();
+            },
             child: Text('Refresh Prediction'),
           ),
         ],
