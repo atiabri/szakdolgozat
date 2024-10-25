@@ -11,10 +11,14 @@ Hobbi futókat segítő platformfüggetlen mobilalkalmazás létrehozása
 
 TODO (elkészítendő feladatok):
 - [X] : Github repository
-- [ ] : több adat rögzítése adott session-ről(magasság)
-- [ ] : több fajta session indítása(gyaloglás, kerékpár - főképernyőn máshogy megjeleníteni)
-- [ ] : sebességmérés tökéletesítése
-- [ ] : Rögzített session adatainak megtekintése (térkép is)
-- [ ] : rögzített adatok kiértékelése és megjelenítése főképernyőn (átlagsebesség javitas)
-- [X] : Social média activity megosztás
-- [ ] : Mesterséges intelligencia támogatás
+- [X] : Adatok rögzítése az adott futó tevékenységről(időtartam, távolság, átlag sebesség(perc/km), kilóméterenkénti átlagsebesség)
+- [X] : Rögzített session adatainak megtekintése (Kilóméterenkénti átlagsebesség grafikonon)
+- [X] : Rögzített tevékenységek listázása a főképernyőn 
+- [X] : Tevékenység megosztása Social médián és E-mailban
+- [X] : Tensorflow Lite modell elkészítése Google Collab használatával
+- [X] : TensorFlow Lite importálása a Flutter projektbe
+- [X] : Mesterséges intelligenciával történő Edzésterv tanácsadás
+- [X] : A felhasználó fejlődésének nyomonkövetése grafikonon (piros-legújabb, kék-legrégibb)
+- [X] : Google Maps API és Geolocator importálása és használata tevékenység rögzítésekor
+- [X] : Felhasználó regisztráció (Teljes név, Felhasználónév, Jelszó, Születési dátum, Testsúly, Magasság, Nem, Edzettségi szint)
+- [X] : Felhasználó adatainak védelme bejelentkezéssel
