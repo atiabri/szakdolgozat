@@ -76,7 +76,7 @@ class _MapPageState extends State<MapPage> {
         });
 
         // Kilométer ellenőrzés
-        if (_dist / 1000 > _kmCheckpoint + 1) {
+        if (_dist / 1000 > _kmCheckpoint) {
           _kmCheckpoint += 1;
 
           // Kilométerenkénti átlagsebesség kiszámítása és hozzáadása a listához
