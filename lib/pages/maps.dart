@@ -22,18 +22,15 @@ class _MapPageState extends State<MapPage> {
   late GoogleMapController _mapController;
   LatLng _center = const LatLng(0, 0);
   List<LatLng> route = [];
-  List<double> _speedsPerKm = []; // Kilométerenkénti sebességek
-
+  List<double> _speedsPerKm = [];
   double _dist = 0;
-  double _kmCheckpoint = 0; // Kilométer checkpoint
+  double _kmCheckpoint = 0;
   late String _displayTime;
   late int _time;
   double _avgSpeed = 0;
-
-  // Új változók a magasságnövekedéshez
-  double _elevationGain = 0; // Teljes magasságnövekedés
-  double? _previousAltitude; // Az előző mérési pont magassága
-
+  double _elevationGain = 0;
+  double? _previousAltitude;
+  bool _isPaused = false; // New variable for pause state
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
 
   @override
@@ -41,6 +38,11 @@ class _MapPageState extends State<MapPage> {
     super.initState();
     _requestLocationPermission();
     _stopWatchTimer.onExecute.add(StopWatchExecute.start);
+    _location.onLocationChanged.listen((event) {
+      if (!_isPaused) {
+        _updateLocation(event);
+      }
+    });
   }
 
   void _requestLocationPermission() async {
@@ -53,64 +55,50 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
-  @override
-  void dispose() async {
-    super.dispose();
-    await _stopWatchTimer.dispose(); // Need to call dispose function.
-  }
+  void _updateLocation(LocationData event) {
+    LatLng loc = LatLng(event.latitude!, event.longitude!);
+    _mapController.animateCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(target: loc, zoom: 15),
+    ));
 
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-    double appendDist;
-
-    _location.onLocationChanged.listen((event) {
-      LatLng loc = LatLng(event.latitude!, event.longitude!);
-      _mapController.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(target: loc, zoom: 15)));
-
-      if (route.isNotEmpty) {
-        appendDist = Geolocator.distanceBetween(route.last.latitude,
-            route.last.longitude, loc.latitude, loc.longitude);
-        setState(() {
-          _dist += appendDist;
-        });
-
-        // Kilométer ellenőrzés
-        if (_dist / 1000 > _kmCheckpoint) {
-          _kmCheckpoint += 1;
-
-          // Kilométerenkénti átlagsebesség kiszámítása és hozzáadása a listához
-          double currentAvgSpeed = _calculateCurrentAvgSpeed();
-          _speedsPerKm.add(currentAvgSpeed);
-        }
-
-        // Magasságváltozás ellenőrzése
-        if (_previousAltitude != null && event.altitude != null) {
-          double altitudeChange = event.altitude! - _previousAltitude!;
-          if (altitudeChange > 0) {
-            _elevationGain += altitudeChange; // Magasságnövekedés frissítése
-          }
-        }
-      }
-
-      // Előző magasság frissítése
-      _previousAltitude = event.altitude;
-
+    if (route.isNotEmpty) {
+      double appendDist = Geolocator.distanceBetween(
+        route.last.latitude,
+        route.last.longitude,
+        loc.latitude,
+        loc.longitude,
+      );
       setState(() {
-        route.add(loc);
-        polyline.add(Polyline(
-            polylineId: PolylineId(route.toString()),
-            points: route,
-            color: Colors.blue,
-            width: 3));
+        _dist += appendDist;
       });
 
-      // Átlagsebesség frissítése
-      _updateAverageSpeed();
+      if (_dist / 1000 > _kmCheckpoint) {
+        _kmCheckpoint += 1;
+        double currentAvgSpeed = _calculateCurrentAvgSpeed();
+        _speedsPerKm.add(currentAvgSpeed);
+      }
+
+      if (_previousAltitude != null && event.altitude != null) {
+        double altitudeChange = event.altitude! - _previousAltitude!;
+        if (altitudeChange > 0) {
+          _elevationGain += altitudeChange;
+        }
+      }
+    }
+
+    _previousAltitude = event.altitude;
+    setState(() {
+      route.add(loc);
+      polyline.add(Polyline(
+        polylineId: PolylineId(route.toString()),
+        points: route,
+        color: Colors.blue,
+        width: 3,
+      ));
     });
+    _updateAverageSpeed();
   }
 
-  // Kilométerenkénti átlagsebesség kiszámítása (min/km)
   double _calculateCurrentAvgSpeed() {
     if (_time > 0 && _dist > 0) {
       double timeInMinutes = _time / (1000 * 60);
@@ -130,19 +118,30 @@ class _MapPageState extends State<MapPage> {
     }
   }
 
+  void _togglePause() {
+    setState(() {
+      _isPaused = !_isPaused;
+      if (_isPaused) {
+        _stopWatchTimer.onExecute.add(StopWatchExecute.stop);
+      } else {
+        _stopWatchTimer.onExecute.add(StopWatchExecute.start);
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(children: [
-        Container(
-            child: GoogleMap(
-          polylines: polyline,
-          zoomControlsEnabled: false,
-          onMapCreated: _onMapCreated,
-          myLocationEnabled: true,
-          initialCameraPosition: CameraPosition(target: _center, zoom: 11),
-        )),
-        Align(
+      body: Stack(
+        children: [
+          GoogleMap(
+            polylines: polyline,
+            zoomControlsEnabled: false,
+            onMapCreated: _onMapCreated,
+            myLocationEnabled: true,
+            initialCameraPosition: CameraPosition(target: _center, zoom: 11),
+          ),
+          Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               width: double.infinity,
@@ -150,7 +149,9 @@ class _MapPageState extends State<MapPage> {
               height: 150,
               padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
               decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(10)),
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Column(
                 children: [
                   Row(
@@ -179,12 +180,10 @@ class _MapPageState extends State<MapPage> {
                             initialData: 0,
                             builder: (context, snap) {
                               _time = snap.data!;
-                              _displayTime = StopWatchTimer.getDisplayTimeHours(
-                                      _time) +
-                                  ":" +
-                                  StopWatchTimer.getDisplayTimeMinute(_time) +
-                                  ":" +
-                                  StopWatchTimer.getDisplayTimeSecond(_time);
+                              _displayTime = StopWatchTimer.getDisplayTime(
+                                  _time,
+                                  hours: false,
+                                  milliSecond: false);
                               return Text(_displayTime,
                                   style: GoogleFonts.montserrat(
                                       fontSize: 30,
@@ -206,43 +205,77 @@ class _MapPageState extends State<MapPage> {
                     ],
                   ),
                   Divider(),
-                  IconButton(
-                    icon: Icon(
-                      Icons.stop_circle_outlined,
-                      size: 50,
-                      color: Color.fromRGBO(125, 69, 180, 1),
-                    ),
-                    padding: EdgeInsets.all(0),
-                    onPressed: () async {
-                      // Debug üzenet: a kilométerenkénti sebességek megjelenítése
-                      print('Kilométerenkénti sebességek: $_speedsPerKm');
-                      print('Teljes távolság: $_dist');
-                      print('Átlagos sebesség: $_avgSpeed');
-                      print('Idő kijelző: $_displayTime');
-                      List<double> emergency = [0.0];
-                      Entry en = Entry(
-                        date: DateFormat.yMMMMd('en_US').format(DateTime.now()),
-                        duration: _displayTime,
-                        speed: _avgSpeed,
-                        distance: _dist,
-                        elevationGain:
-                            _elevationGain, // Magasságnövekedés mentése
-                        speedPerKm: _dist > 1
-                            ? _speedsPerKm
-                            : emergency, // Ha a távolság 0, akkor a sebesség per km legyen 0.0
-                        userId: widget.userId,
-                      );
-
-                      // Debug üzenet: a létrehozott Entry objektum megjelenítése
-                      print('Létrehozott Entry objektum: ${en.toMap()}');
-
-                      Navigator.pop(context, en);
-                    },
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Pause Button with purple circle background
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color:
+                              Color.fromRGBO(125, 69, 180, 1), // Purple color
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            _isPaused ? Icons.play_arrow : Icons.pause,
+                            color: Colors.white,
+                          ),
+                          iconSize: 40,
+                          onPressed: _togglePause,
+                        ),
+                      ),
+                      // Stop Button with purple circle background
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color:
+                              Color.fromRGBO(125, 69, 180, 1), // Purple color
+                        ),
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.stop,
+                            color: Colors.white,
+                          ),
+                          iconSize: 40,
+                          onPressed: () async {
+                            print('Kilométerenkénti sebességek: $_speedsPerKm');
+                            print('Teljes távolság: $_dist');
+                            print('Átlagos sebesség: $_avgSpeed');
+                            print('Idő kijelző: $_displayTime');
+                            List<double> emergency = [0.0];
+                            Entry en = Entry(
+                              date: DateFormat.yMMMMd('en_US')
+                                  .format(DateTime.now()),
+                              duration: _displayTime,
+                              speed: _avgSpeed,
+                              distance: _dist,
+                              elevationGain: _elevationGain,
+                              speedPerKm: _dist > 1 ? _speedsPerKm : emergency,
+                              userId: widget.userId,
+                            );
+                            print('Létrehozott Entry objektum: ${en.toMap()}');
+                            Navigator.pop(context, en);
+                          },
+                        ),
+                      ),
+                    ],
                   )
                 ],
               ),
-            ))
-      ]),
+            ),
+          )
+        ],
+      ),
     );
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
+  }
+
+  @override
+  void dispose() {
+    _stopWatchTimer.dispose();
+    super.dispose();
   }
 }
