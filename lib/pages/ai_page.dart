@@ -118,7 +118,7 @@ class _AiPageState extends State<AiPage> {
         print("UI state is being updated.");
 
         _fitnessScore = fitnessScore; // Fitness score mentése
-
+        _fitnessScore = _fitnessScore > 100 ? 100 : _fitnessScore;
         _messages.removeAt(1);
         _messages.insert(
           1,
