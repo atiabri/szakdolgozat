@@ -1,3 +1,4 @@
+import 'dart:async'; // Add this import at the top
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,17 +31,19 @@ class _MapPageState extends State<MapPage> {
   double _avgSpeed = 0;
   double _elevationGain = 0;
   double? _previousAltitude;
-  bool _isPaused = false; // New variable for pause state
+  bool _isPaused = false;
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
+  Timer? _locationTimer; // Timer for 1-second updates
 
   @override
   void initState() {
     super.initState();
     _requestLocationPermission();
     _stopWatchTimer.onExecute.add(StopWatchExecute.start);
-    _location.onLocationChanged.listen((event) {
+    _locationTimer = Timer.periodic(Duration(seconds: 1), (Timer timer) async {
       if (!_isPaused) {
-        _updateLocation(event);
+        LocationData currentLocation = await _location.getLocation();
+        _updateLocation(currentLocation);
       }
     });
   }
@@ -280,6 +283,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void dispose() {
     _stopWatchTimer.dispose();
+    _locationTimer?.cancel(); // Cancel the timer when disposing
     super.dispose();
   }
 }
