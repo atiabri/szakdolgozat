@@ -154,41 +154,41 @@ class _AiPageState extends State<AiPage> {
     String trainingPlan;
 
     if (fitnessScore < 25) {
-      trainingPlan = 'Training Plan:\n\n'
-          'Monday: 30 minutes of jogging\n'
+      trainingPlan = 'Beginner Level Training Plan:\n\n'
+          'Monday: 15 minutes of brisk walking, 15 minutes of light stretching\n'
           'Tuesday: Rest\n'
-          'Wednesday: 30 minutes of cycling\n'
-          'Thursday: Strength training for 30 minutes\n'
-          'Friday: 20 minutes of yoga\n'
-          'Saturday: Rest\n'
-          'Sunday: 30 minutes of running\n';
+          'Wednesday: 20 minutes of light yoga\n'
+          'Thursday: 15 minutes of walking + 10 minutes of bodyweight exercises (e.g., squats, push-ups)\n'
+          'Friday: Rest\n'
+          'Saturday: 20 minutes of cycling at an easy pace\n'
+          'Sunday: 30 minutes of walking in nature\n';
     } else if (fitnessScore < 50) {
-      trainingPlan = 'Training Plan:\n\n'
-          'Monday: 40 minutes of jogging\n'
-          'Tuesday: Strength training for 30 minutes\n'
-          'Wednesday: 30 minutes of cycling\n'
+      trainingPlan = 'Intermediate Level Training Plan:\n\n'
+          'Monday: 20 minutes of jogging\n'
+          'Tuesday: 30 minutes of bodyweight strength training (e.g., lunges, planks)\n'
+          'Wednesday: 25 minutes of cycling\n'
           'Thursday: Rest\n'
-          'Friday: 30 minutes of interval running\n'
-          'Saturday: 20 minutes of yoga\n'
-          'Sunday: 30 minutes of brisk walking\n';
+          'Friday: 20 minutes of interval running (1 min jog, 1 min sprint, repeat)\n'
+          'Saturday: 20 minutes of yoga or pilates\n'
+          'Sunday: 40 minutes of brisk hiking\n';
     } else if (fitnessScore < 75) {
-      trainingPlan = 'Training Plan:\n\n'
-          'Monday: 45 minutes of running\n'
-          'Tuesday: Strength training for 45 minutes\n'
-          'Wednesday: 30 minutes of cycling\n'
-          'Thursday: Rest\n'
+      trainingPlan = 'Advanced Level Training Plan:\n\n'
+          'Monday: 30 minutes of steady-pace running\n'
+          'Tuesday: 40 minutes of gym strength training (upper body focus)\n'
+          'Wednesday: 30 minutes of cycling at moderate intensity\n'
+          'Thursday: Rest or light recovery activity (e.g., yoga, stretching)\n'
           'Friday: 30 minutes of high-intensity interval training (HIIT)\n'
-          'Saturday: 30 minutes of yoga\n'
-          'Sunday: 1 hour of hiking\n';
+          'Saturday: 45 minutes of yoga with core focus\n'
+          'Sunday: 60 minutes of trail running or outdoor sports\n';
     } else {
-      trainingPlan = 'Training Plan:\n\n'
-          'Monday: 1 hour of running\n'
-          'Tuesday: Strength training for 1 hour\n'
-          'Wednesday: 45 minutes of cycling\n'
-          'Thursday: Rest or light activity\n'
-          'Friday: 30 minutes of sprinting drills\n'
-          'Saturday: 45 minutes of yoga and flexibility training\n'
-          'Sunday: 1 hour of hiking or outdoor sports\n';
+      trainingPlan = 'Elite Level Training Plan:\n\n'
+          'Monday: 1 hour of running (moderate pace)\n'
+          'Tuesday: 1 hour of gym strength training (full body focus)\n'
+          'Wednesday: 45 minutes of cycling (mix of intervals and steady pace)\n'
+          'Thursday: Active recovery (30 minutes of stretching or mobility work)\n'
+          'Friday: 45 minutes of sprint interval training (e.g., 200m sprints, 90s rest)\n'
+          'Saturday: 1 hour of yoga and flexibility exercises\n'
+          'Sunday: 90 minutes of long-distance running or outdoor endurance sports\n';
     }
 
     return trainingPlan;
