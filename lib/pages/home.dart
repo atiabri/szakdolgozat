@@ -5,6 +5,7 @@ import 'package:onlab_final/pages/maps.dart';
 import 'package:onlab_final/widgets/entry_card.dart';
 import 'package:onlab_final/pages/activity_chart.dart';
 import 'package:onlab_final/pages/ai_page.dart';
+import 'package:onlab_final/pages/login_page.dart';
 
 class HomePage extends StatefulWidget {
   final int currentUserId; // Pass current user ID to HomePage
@@ -78,6 +79,15 @@ class _HomePageState extends State<HomePage> {
         title: Text("AtiRun"),
         foregroundColor: Colors.white,
         backgroundColor: Color.fromRGBO(125, 69, 180, 1),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => LoginPage()),
+            );
+          },
+        ),
       ),
       body: _selectedIndex == 0
           ? _data.isEmpty

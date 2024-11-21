@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'fitness_ai.dart';
+import 'home.dart';
 import 'package:onlab_final/db/db.dart';
 
 class AiPage extends StatefulWidget {
@@ -232,6 +233,20 @@ class _AiPageState extends State<AiPage> {
         title: Text('AI Fitness Prediction'),
         backgroundColor: Color.fromRGBO(125, 69, 180, 1),
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomePage(
+                  key: Key("HomePage"),
+                  currentUserId: widget.userId,
+                ),
+              ),
+            );
+          },
+        ),
       ),
       body: Column(
         children: [
