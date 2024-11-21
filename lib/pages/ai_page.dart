@@ -14,8 +14,8 @@ class AiPage extends StatefulWidget {
 class _AiPageState extends State<AiPage> {
   final FitnessAI _fitnessAI = FitnessAI();
   List<Widget> _messages = [];
-  String _trainingPlan = ""; // Állapotváltozó az edzéstervhez
-  double _fitnessScore = 0.0; // Állapotváltozó a fitness score-nak
+  String _trainingPlan = "";
+  double _fitnessScore = 0.0;
 
   @override
   void initState() {
@@ -117,7 +117,7 @@ class _AiPageState extends State<AiPage> {
       setState(() {
         print("UI state is being updated.");
 
-        _fitnessScore = fitnessScore; // Fitness score mentése
+        _fitnessScore = fitnessScore;
         _fitnessScore = _fitnessScore > 100 ? 100 : _fitnessScore;
         _messages.removeAt(1);
         _messages.insert(
@@ -239,7 +239,6 @@ class _AiPageState extends State<AiPage> {
             child: ListView(
               children: [
                 ..._messages,
-                // Itt jelenítjük meg az edzéstervet
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       vertical: 10.0, horizontal: 15.0),
@@ -253,7 +252,7 @@ class _AiPageState extends State<AiPage> {
                         borderRadius: BorderRadius.circular(10.0),
                       ),
                       child: Text(
-                        _trainingPlan, // A trainingPlan itt jelenik meg
+                        _trainingPlan,
                         style: TextStyle(fontSize: 16.0),
                       ),
                     ),

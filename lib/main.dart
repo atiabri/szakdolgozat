@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:onlab_final/pages/home.dart';
-import 'package:onlab_final/pages/login_page.dart'; // Importáld a regisztrációs oldalt
+import 'package:onlab_final/pages/login_page.dart';
 import 'package:onlab_final/db/db.dart';
 
 void main() async {

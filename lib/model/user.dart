@@ -9,7 +9,7 @@ class User {
   String gender;
   double weight;
   double height;
-  String level; // Új mező a szinthez
+  String level;
 
   User({
     this.id,
@@ -20,7 +20,7 @@ class User {
     required this.gender,
     required this.weight,
     required this.height,
-    required this.level, // Új mező a konstruktorban
+    required this.level,
   });
 
   // Convert a User object to a Map for database operations
@@ -34,7 +34,7 @@ class User {
       'gender': gender,
       'weight': weight,
       'height': height,
-      'level': level, // Új mező a mapban
+      'level': level,
     };
   }
 
@@ -49,7 +49,7 @@ class User {
       gender: map['gender'],
       weight: map['weight'],
       height: map['height'],
-      level: map['level'], // Új mező beolvasása
+      level: map['level'],
     );
   }
 

@@ -3,8 +3,8 @@ import 'package:onlab_final/db/db.dart';
 import 'package:onlab_final/model/entry.dart';
 import 'package:onlab_final/pages/maps.dart';
 import 'package:onlab_final/widgets/entry_card.dart';
-import 'package:onlab_final/pages/activity_chart.dart'; // Import the new page
-import 'package:onlab_final/pages/ai_page.dart'; // Import the empty page
+import 'package:onlab_final/pages/activity_chart.dart';
+import 'package:onlab_final/pages/ai_page.dart';
 
 class HomePage extends StatefulWidget {
   final int currentUserId; // Pass current user ID to HomePage
@@ -65,8 +65,7 @@ class _HomePageState extends State<HomePage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              AiPage(userId: widget.currentUserId), // userID átadása
+          builder: (context) => AiPage(userId: widget.currentUserId),
         ),
       );
     }
@@ -90,8 +89,7 @@ class _HomePageState extends State<HomePage> {
                       entry: _data[index],
                       onDelete: () {
                         if (_data[index].id != null) {
-                          _deleteEntry(_data[index]
-                              .id!); // Biztosítjuk, hogy id nem null
+                          _deleteEntry(_data[index].id!);
                         } else {
                           print("Entry ID is null, cannot delete.");
                         }
@@ -124,7 +122,7 @@ class _HomePageState extends State<HomePage> {
             label: 'Activity Chart',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.smart_toy), // AI icon
+            icon: Icon(Icons.smart_toy),
             label: 'AI',
           ),
         ],

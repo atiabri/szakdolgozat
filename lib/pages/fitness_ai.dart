@@ -8,16 +8,16 @@ class FitnessAI {
 
   Future<void> loadModel() async {
     try {
-      print('Loading AI model...'); // Debug
+      print('Loading AI model...'); // Debug message
       _interpreter = await Interpreter.fromAsset('fitness_level_model.tflite');
-      print('Model successfully loaded.'); // Debug
+      print('Model successfully loaded.'); // Debug message
     } catch (e) {
-      print('Error loading model: $e'); // Debug
+      print('Error loading model: $e'); // Debug message
     }
   }
 
   List<dynamic> predict(List<double> inputData) {
-    print('Running AI prediction...'); // Debug
+    print('Running AI prediction...'); // Debug message
     if (inputData.length != 8) {
       print(
           'Invalid input data length. Expected 8, but got ${inputData.length}');
@@ -31,7 +31,7 @@ class FitnessAI {
 
     try {
       _interpreter?.run(input.buffer, output.buffer);
-      print('Prediction successful.'); // Debug
+      print('Prediction successful.'); // Debug message
     } catch (e) {
       print('Error during prediction: $e');
       return [0.0];
@@ -41,7 +41,7 @@ class FitnessAI {
   }
 
   void dispose() {
-    print('Disposing interpreter...'); // Debug
+    print('Disposing interpreter...'); // Debug message
     _interpreter?.close();
   }
 }

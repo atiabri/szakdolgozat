@@ -1,4 +1,4 @@
-import 'dart:async'; // Add this import at the top
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -283,7 +283,7 @@ class _MapPageState extends State<MapPage> {
   @override
   void dispose() {
     _stopWatchTimer.dispose();
-    _locationTimer?.cancel(); // Cancel the timer when disposing
+    _locationTimer?.cancel();
     super.dispose();
   }
 }

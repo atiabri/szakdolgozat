@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:onlab_final/db/db.dart';
 import 'package:onlab_final/model/entry.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:onlab_final/pages/home.dart'; // Make sure this import is correct for your HomePage
+import 'package:onlab_final/pages/home.dart';
 
 class ActivityChartPage extends StatefulWidget {
   final int userId;
@@ -24,15 +24,15 @@ class _ActivityChartPageState extends State<ActivityChartPage> {
 
   // Fetch the user's activities from the database
   void _fetchUserActivities() async {
-    print("Lekérdezés kezdete..."); // Debug üzenet
+    print("Lekérdezés kezdete..."); // Debug message
     List<Map<String, dynamic>> results =
         await DB.query(Entry.table, userId: widget.userId);
 
-    print("Lekérdezett eredmények: $results"); // Debug üzenet
+    print("Lekérdezett eredmények: $results"); // Debug message
 
     setState(() {
       _userEntries = results.map((item) => Entry.fromMap(item)).toList();
-      print("Futás adatok: $_userEntries"); // Debug üzenet
+      print("Futás adatok: $_userEntries"); // Debug message
     });
   }
 
@@ -46,7 +46,6 @@ class _ActivityChartPageState extends State<ActivityChartPage> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            // Navigate back to the HomePage
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(

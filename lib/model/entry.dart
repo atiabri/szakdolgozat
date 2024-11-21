@@ -8,7 +8,7 @@ class Entry {
   double speed;
   double distance;
   double elevationGain;
-  List<double> speedPerKm; // Sebességek listája
+  List<double> speedPerKm;
 
   Entry({
     this.id,
@@ -18,10 +18,10 @@ class Entry {
     required this.speed,
     required this.distance,
     required this.elevationGain,
-    required this.speedPerKm, // Kilométerenkénti sebességek
+    required this.speedPerKm,
   });
 
-  // Map-á alakításkor
+// Convert an Entry object to a Map for database operations
   Map<String, dynamic> toMap() {
     return {
       'user_id': userId,
@@ -29,14 +29,12 @@ class Entry {
       'duration': duration,
       'speed': speed,
       'distance': distance,
-      'elevation_gain':
-          elevationGain ?? 0.0, // Null érték esetén alapértelmezett 0.0
-      'speed_per_km':
-          speedPerKm.join(','), // Lista elemeinek összefűzése vesszővel
+      'elevation_gain': elevationGain ?? 0.0,
+      'speed_per_km': speedPerKm.join(','),
     };
   }
 
-  // Adatbázisból való visszaolvasás
+  // Convert a Map to an Entry object
   static Entry fromMap(Map<String, dynamic> map) {
     return Entry(
       id: map['id'],
@@ -45,13 +43,12 @@ class Entry {
       duration: map['duration'],
       speed: map['speed'],
       distance: map['distance'],
-      elevationGain: map['elevation_gain'] != null
-          ? map['elevation_gain']
-          : 0.0, // Null kezelés
+      elevationGain:
+          map['elevation_gain'] != null ? map['elevation_gain'] : 0.0,
       speedPerKm: (map['speed_per_km'] as String)
           .split(',')
           .map((s) => double.parse(s))
-          .toList(), // A string elemeit visszaalakítjuk double listává
+          .toList(),
     );
   }
 }

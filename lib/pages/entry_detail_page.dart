@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:onlab_final/model/entry.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:fl_chart/fl_chart.dart'; // Importáljuk a diagram könyvtárat
+import 'package:fl_chart/fl_chart.dart'; // Libary for charts
 
 class EntryDetailPage extends StatelessWidget {
   final Entry entry;
@@ -21,16 +21,15 @@ Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
     Share.share(content, subject: 'Run Details');
   }
 
-  // Színinterpolációs függvény a leglassabb és leggyorsabb sebesség alapján
+  // Method for interpolation, regarding the min and max values
   Color interpolateColor(double value, double min, double max) {
     if (max == min) return Colors.purple;
     double t = (value - min) / (max - min);
-    return Color.lerp(Colors.blue, Colors.red, t)!; // Kék-piros interpoláció
+    return Color.lerp(Colors.blue, Colors.red, t)!;
   }
 
   @override
   Widget build(BuildContext context) {
-    // Leggyorsabb és leglassabb sebesség értékek meghatározása
     double minSpeed = entry.speedPerKm.reduce((a, b) => a < b ? a : b);
     double maxSpeed = entry.speedPerKm.reduce((a, b) => a > b ? a : b);
 
@@ -45,11 +44,9 @@ Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Kilométerenkénti sebesség oszlopdiagram
             SizedBox(
-              height: 250, // Diagram mérete
+              height: 250,
               child: Center(
-                // Középre igazítás
                 child: Card(
                   elevation: 4,
                   shape: RoundedRectangleBorder(
@@ -59,21 +56,20 @@ Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
                     padding: const EdgeInsets.all(16.0),
                     child: BarChart(
                       BarChartData(
-                        maxY: 8, // Y tengely maximuma 8 min/km
-                        minY: 0, // Y tengely minimuma (min/km)
+                        maxY: 8,
+                        minY: 0,
                         barGroups: List.generate(
                           entry.speedPerKm.length,
                           (index) => BarChartGroupData(
-                            x: index, // X tengely érték (kilométerek)
+                            x: index,
                             barRods: [
                               BarChartRodData(
-                                y: entry.speedPerKm[index], // Oszlop magassága
+                                y: entry.speedPerKm[index],
                                 colors: [
                                   interpolateColor(entry.speedPerKm[index],
                                       minSpeed, maxSpeed)
-                                ], // Interpolált színek
-                                width:
-                                    40, // Oszlop szélessége, hogy kitöltse a kilométert
+                                ],
+                                width: 40,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ],
@@ -81,15 +77,11 @@ Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
                         ),
                         titlesData: FlTitlesData(
                           show: true,
-                          topTitles: SideTitles(
-                              showTitles: false), // Felső címkék kikapcsolása
-                          rightTitles: SideTitles(
-                              showTitles:
-                                  false), // Jobb oldali címkék kikapcsolása
+                          topTitles: SideTitles(showTitles: false),
+                          rightTitles: SideTitles(showTitles: false),
                           bottomTitles: SideTitles(
                             showTitles: true,
                             getTitles: (value) {
-                              // Kilométerek címkézése 1-től
                               return value.toInt() < 10
                                   ? '${value.toInt() + 1} km'
                                   : '';
@@ -98,14 +90,12 @@ Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
                           leftTitles: SideTitles(
                             showTitles: true,
                             getTitles: (value) {
-                              // Y tengelyen 0 és 8 között lévő értékek megjelenítése, min/km mértékegységgel
                               return '${value.toStringAsFixed(0)} min/km';
                             },
-                            reservedSize: 60, // Hely biztosítása a címkézésnek
+                            reservedSize: 60,
                           ),
                         ),
-                        gridData:
-                            FlGridData(show: true), // Rácsvonalak megjelenítése
+                        gridData: FlGridData(show: true),
                         borderData: FlBorderData(
                           show: true,
                           border: Border(
@@ -115,14 +105,14 @@ Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
                         ),
                         barTouchData: BarTouchData(
                           enabled: true,
-                        ), // Interakció bekapcsolása
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-            SizedBox(height: 20), // Diagram alatti rész
+            SizedBox(height: 20),
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -172,8 +162,7 @@ Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
                     SizedBox(height: 10),
                     Row(
                       children: [
-                        Icon(Icons.terrain,
-                            color: Colors.purple), // Magasság ikon
+                        Icon(Icons.terrain, color: Colors.purple),
                         SizedBox(width: 8),
                         Text(
                             'Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m',

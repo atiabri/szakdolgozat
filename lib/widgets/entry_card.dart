@@ -25,14 +25,13 @@ class EntryCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
-        elevation: 5, // Kiemelkedés (árnyék)
+        elevation: 5,
         margin: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: Padding(
           padding: EdgeInsets.all(15),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Felső sor: dátum és távolság
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -55,7 +54,6 @@ class EntryCard extends StatelessWidget {
                 ],
               ),
               SizedBox(height: 10),
-              // Alsó sor: időtartam és sebesség
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -74,14 +72,14 @@ class EntryCard extends StatelessWidget {
                       Icon(Icons.speed, size: 18, color: Colors.grey),
                       SizedBox(width: 5),
                       Text(
-                        "${entry.speed.toStringAsFixed(2)} min/km", // "perc/km" -> "min/km"
+                        "${entry.speed.toStringAsFixed(2)} min/km",
                         style: GoogleFonts.montserrat(fontSize: 14),
                       ),
                     ],
                   ),
                 ],
               ),
-              if (onDelete != null) // Törlés gomb, ha onDelete nem null
+              if (onDelete != null)
                 Divider(
                   color: Colors.grey.shade300,
                   thickness: 1,
@@ -94,7 +92,7 @@ class EntryCard extends StatelessWidget {
                     onPressed: onDelete,
                     icon: Icon(Icons.delete, color: Colors.red),
                     label: Text(
-                      "Delete", // "Törlés" -> "Delete"
+                      "Delete",
                       style: GoogleFonts.montserrat(
                         color: Colors.red,
                         fontWeight: FontWeight.w500,

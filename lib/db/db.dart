@@ -59,6 +59,7 @@ abstract class DB {
     }
   }
 
+  // Delete data from a table
   static Future<int> delete(String table, int id) async {
     final db = await getDatabase();
     return await db.delete(table, where: 'id = ?', whereArgs: [id]);
@@ -129,7 +130,7 @@ abstract class DB {
     }
   }
 
-  // Normalizáló függvény (StandardScaler logika alapján)
+  // Provide a method normalize data (StandardScaler logic)
   static double standardize(double value, double mean, double stdDev) {
     return (value - mean) / stdDev;
   }
@@ -232,7 +233,7 @@ abstract class DB {
     ];
   }
 
-  // Frissített statisztikai értékek a standardizáláshoz
+  // Statistic values for normalization
   static const double meanAge = 39.11;
   static const double stdDevAge = 12.10;
 
