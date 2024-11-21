@@ -72,15 +72,15 @@ class _ActivityChartPageState extends State<ActivityChartPage> {
                   child: ScatterChart(
                     ScatterChartData(
                       minX: 0, // Minimum distance (km)
-                      maxX: 40, // Maximum distance (km)
+                      maxX: 20, // Maximum distance (km)
                       minY: 0, // Minimum speed (min/km)
-                      maxY: 10, // Maximum speed (min/km)
+                      maxY: 12, // Maximum speed (min/km)
                       gridData: FlGridData(
                         show: true,
                         drawHorizontalLine: true,
                         drawVerticalLine: true,
                         horizontalInterval: 1,
-                        verticalInterval: 10,
+                        verticalInterval: 5,
                         getDrawingHorizontalLine: (value) {
                           return FlLine(
                             color: Colors.grey.withOpacity(0.5),
@@ -110,7 +110,7 @@ class _ActivityChartPageState extends State<ActivityChartPage> {
                         ),
                         bottomTitles: SideTitles(
                           showTitles: true,
-                          interval: 10,
+                          interval: 5,
                           getTitles: (value) {
                             return '${value.toInt()} km'; // X-axis shows distance (km)
                           },

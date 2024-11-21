@@ -26,42 +26,34 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _addEntries(Entry en) async {
-    // Debug üzenet: a beszúrandó entry megjelenítése
     print('A beszúrandó Entry objektum: ${en.toMap()}');
-
     int result = await DB.insert(Entry.table, en.toMap());
-
-    // Debug üzenet a beszúrás eredményéről
     print('Beszúrás eredménye: $result');
-
-    _fetchEntries(); // A bejegyzések frissítése beszúrás után
+    _fetchEntries(); // Refresh entries after insertion
   }
 
-// A futásbejegyzések lekérdezése a felhasználó azonosítója alapján
   void _fetchEntries() async {
     print('Bejegyzések lekérdezése a user_id alapján: ${widget.currentUserId}');
-
     List<Map<String, dynamic>> _results =
         await DB.query(Entry.table, userId: widget.currentUserId);
-
-    // Debug üzenet: a lekérdezés eredményének megjelenítése
     print('Lekérdezés eredménye: $_results');
-
     setState(() {
       _data = _results.map((item) => Entry.fromMap(item)).toList();
-
-      // Debug üzenet: az Entry objektumok leképezése után
       print('Leképezett Entries objektumok: $_data');
     });
   }
 
-  // Navigation for bottom navigation bar
+  void _deleteEntry(int id) async {
+    await DB.delete(Entry.table, id); // Delete from database
+    _fetchEntries(); // Refresh entries after deletion
+    print("Entry with ID $id deleted.");
+  }
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
 
-    // Navigate based on the selected index
     if (index == 1) {
       Navigator.push(
         context,
@@ -94,7 +86,17 @@ class _HomePageState extends State<HomePage> {
               : ListView.builder(
                   itemCount: _data.length,
                   itemBuilder: (context, index) {
-                    return EntryCard(entry: _data[index]);
+                    return EntryCard(
+                      entry: _data[index],
+                      onDelete: () {
+                        if (_data[index].id != null) {
+                          _deleteEntry(_data[index]
+                              .id!); // Biztosítjuk, hogy id nem null
+                        } else {
+                          print("Entry ID is null, cannot delete.");
+                        }
+                      },
+                    );
                   },
                 )
           : Container(), // Placeholder for other pages

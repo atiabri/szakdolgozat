@@ -14,7 +14,7 @@ Run Details:
 Date: ${entry.date}
 Distance: ${(entry.distance / 1000).toStringAsFixed(2)} km
 Duration: ${entry.duration}
-Speed: ${entry.speed.toStringAsFixed(2)} perc/km
+Speed: ${entry.speed.toStringAsFixed(2)} min/km
 Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
 ''';
 
@@ -59,8 +59,8 @@ Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
                     padding: const EdgeInsets.all(16.0),
                     child: BarChart(
                       BarChartData(
-                        maxY: 8, // Y tengely maximuma 8 perc/km
-                        minY: 0, // Y tengely minimuma (perc/km)
+                        maxY: 8, // Y tengely maximuma 8 min/km
+                        minY: 0, // Y tengely minimuma (min/km)
                         barGroups: List.generate(
                           entry.speedPerKm.length,
                           (index) => BarChartGroupData(
@@ -98,10 +98,10 @@ Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
                           leftTitles: SideTitles(
                             showTitles: true,
                             getTitles: (value) {
-                              // Y tengelyen 0 és 8 között lévő értékek megjelenítése
-                              return value.toStringAsFixed(0);
+                              // Y tengelyen 0 és 8 között lévő értékek megjelenítése, min/km mértékegységgel
+                              return '${value.toStringAsFixed(0)} min/km';
                             },
-                            reservedSize: 40, // Hely biztosítása a címkézésnek
+                            reservedSize: 60, // Hely biztosítása a címkézésnek
                           ),
                         ),
                         gridData:
@@ -165,16 +165,15 @@ Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m
                       children: [
                         Icon(Icons.speed, color: Colors.purple),
                         SizedBox(width: 8),
-                        Text('Speed: ${entry.speed.toStringAsFixed(2)} perc/km',
+                        Text('Speed: ${entry.speed.toStringAsFixed(2)} min/km',
                             style: TextStyle(fontSize: 18)),
                       ],
                     ),
                     SizedBox(height: 10),
-                    // Új sor a magasság megjelenítésére
                     Row(
                       children: [
                         Icon(Icons.terrain,
-                            color: Colors.purple), // Megváltoztatott ikon
+                            color: Colors.purple), // Magasság ikon
                         SizedBox(width: 8),
                         Text(
                             'Elevation Gain: ${entry.elevationGain.toStringAsFixed(2)} m',

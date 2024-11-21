@@ -59,6 +59,11 @@ abstract class DB {
     }
   }
 
+  static Future<int> delete(String table, int id) async {
+    final db = await getDatabase();
+    return await db.delete(table, where: 'id = ?', whereArgs: [id]);
+  }
+
   // Provide a method to access the database instance
   static Future<Database> getDatabase() async {
     if (_db == null) {
