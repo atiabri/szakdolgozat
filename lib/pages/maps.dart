@@ -156,127 +156,135 @@ class _MapPageState extends State<MapPage> {
           ),
           Align(
             alignment: Alignment.bottomCenter,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Container(
-                width: double.infinity,
-                margin: EdgeInsets.fromLTRB(10, 0, 10, 40),
-                height: 150,
-                padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: SafeArea(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  width: double.infinity,
+                  margin: EdgeInsets.fromLTRB(10, 0, 10, 20),
+                  height: 150,
+                  padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
                       children: [
-                        Column(
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("AVG SPEED (MIN/KM)",
-                                style: GoogleFonts.montserrat(
-                                    fontSize: 10, fontWeight: FontWeight.w300)),
-                            Text(
-                                _avgSpeed > 0
-                                    ? _avgSpeed.toStringAsFixed(2)
-                                    : "--",
-                                style: GoogleFonts.montserrat(
-                                    fontSize: 30, fontWeight: FontWeight.w300))
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            Text("TIME",
-                                style: GoogleFonts.montserrat(
-                                    fontSize: 10, fontWeight: FontWeight.w300)),
-                            StreamBuilder<int>(
-                              stream: _stopWatchTimer.rawTime,
-                              initialData: 0,
-                              builder: (context, snap) {
-                                _time = snap.data!;
-                                _displayTime = StopWatchTimer.getDisplayTime(
-                                    _time,
-                                    hours: false,
-                                    milliSecond: false);
-                                return Text(_displayTime,
+                            Column(
+                              children: [
+                                Text("AVG SPEED (MIN/KM)",
+                                    style: GoogleFonts.montserrat(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w300)),
+                                Text(
+                                    _avgSpeed > 0
+                                        ? _avgSpeed.toStringAsFixed(2)
+                                        : "--",
                                     style: GoogleFonts.montserrat(
                                         fontSize: 30,
-                                        fontWeight: FontWeight.w300));
-                              },
+                                        fontWeight: FontWeight.w300))
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text("TIME",
+                                    style: GoogleFonts.montserrat(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w300)),
+                                StreamBuilder<int>(
+                                  stream: _stopWatchTimer.rawTime,
+                                  initialData: 0,
+                                  builder: (context, snap) {
+                                    _time = snap.data!;
+                                    _displayTime =
+                                        StopWatchTimer.getDisplayTime(_time,
+                                            hours: false, milliSecond: false);
+                                    return Text(_displayTime,
+                                        style: GoogleFonts.montserrat(
+                                            fontSize: 30,
+                                            fontWeight: FontWeight.w300));
+                                  },
+                                )
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text("DISTANCE (KM)",
+                                    style: GoogleFonts.montserrat(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w300)),
+                                Text((_dist / 1000).toStringAsFixed(2),
+                                    style: GoogleFonts.montserrat(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.w300))
+                              ],
                             )
                           ],
                         ),
-                        Column(
+                        Divider(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            Text("DISTANCE (KM)",
-                                style: GoogleFonts.montserrat(
-                                    fontSize: 10, fontWeight: FontWeight.w300)),
-                            Text((_dist / 1000).toStringAsFixed(2),
-                                style: GoogleFonts.montserrat(
-                                    fontSize: 30, fontWeight: FontWeight.w300))
+                            // Pause Button with purple circle background
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color.fromRGBO(125, 69, 180, 1),
+                              ),
+                              child: IconButton(
+                                icon: Icon(
+                                  _isPaused ? Icons.play_arrow : Icons.pause,
+                                  color: Colors.white,
+                                ),
+                                iconSize: 40,
+                                onPressed: _togglePause,
+                              ),
+                            ),
+                            // Stop Button with purple circle background
+                            Container(
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color.fromRGBO(125, 69, 180, 1),
+                              ),
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.stop,
+                                  color: Colors.white,
+                                ),
+                                iconSize: 40,
+                                onPressed: () async {
+                                  print(
+                                      'Kilométerenkénti sebességek: $_speedsPerKm');
+                                  print('Teljes távolság: $_dist');
+                                  print('Átlagos sebesség: $_avgSpeed');
+                                  print('Idő kijelző: $_displayTime');
+                                  List<double> emergency = [0.0];
+                                  Entry en = Entry(
+                                    date: DateFormat.yMMMMd('en_US')
+                                        .format(DateTime.now()),
+                                    duration: _displayTime,
+                                    speed: _avgSpeed,
+                                    distance: _dist,
+                                    elevationGain: _elevationGain,
+                                    speedPerKm:
+                                        _dist > 1 ? _speedsPerKm : emergency,
+                                    userId: widget.userId,
+                                  );
+                                  print(
+                                      'Létrehozott Entry objektum: ${en.toMap()}');
+                                  Navigator.pop(context, en);
+                                },
+                              ),
+                            ),
                           ],
                         )
                       ],
                     ),
-                    Divider(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        // Pause Button with purple circle background
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color.fromRGBO(125, 69, 180, 1),
-                          ),
-                          child: IconButton(
-                            icon: Icon(
-                              _isPaused ? Icons.play_arrow : Icons.pause,
-                              color: Colors.white,
-                            ),
-                            iconSize: 40,
-                            onPressed: _togglePause,
-                          ),
-                        ),
-                        // Stop Button with purple circle background
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Color.fromRGBO(125, 69, 180, 1),
-                          ),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.stop,
-                              color: Colors.white,
-                            ),
-                            iconSize: 40,
-                            onPressed: () async {
-                              print(
-                                  'Kilométerenkénti sebességek: $_speedsPerKm');
-                              print('Teljes távolság: $_dist');
-                              print('Átlagos sebesség: $_avgSpeed');
-                              print('Idő kijelző: $_displayTime');
-                              List<double> emergency = [0.0];
-                              Entry en = Entry(
-                                date: DateFormat.yMMMMd('en_US')
-                                    .format(DateTime.now()),
-                                duration: _displayTime,
-                                speed: _avgSpeed,
-                                distance: _dist,
-                                elevationGain: _elevationGain,
-                                speedPerKm:
-                                    _dist > 1 ? _speedsPerKm : emergency,
-                                userId: widget.userId,
-                              );
-                              print(
-                                  'Létrehozott Entry objektum: ${en.toMap()}');
-                              Navigator.pop(context, en);
-                            },
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
+                  ),
                 ),
               ),
             ),
