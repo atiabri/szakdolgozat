@@ -103,10 +103,20 @@ class _MapPageState extends State<MapPage> {
   }
 
   double _calculateCurrentAvgSpeed() {
-    if (_time > 0 && _dist > 0) {
-      double timeInMinutes = _time / (1000 * 60);
-      double distanceInKm = _dist / 1000;
-      return timeInMinutes / distanceInKm;
+    if (_dist > 0) {
+      double elapsedTimeInSeconds = _time / 1000;
+      double elapsedDistanceInKm = _dist / 1000;
+
+      // Handle the case for the last unfinished kilometer
+      if (_speedsPerKm.isNotEmpty &&
+          elapsedDistanceInKm < _speedsPerKm.length + 1) {
+        double remainingDistance = elapsedDistanceInKm - _kmCheckpoint;
+        double remainingTimeInMinutes = elapsedTimeInSeconds / 60;
+        return remainingTimeInMinutes / remainingDistance;
+      }
+
+      double timeInMinutes = elapsedTimeInSeconds / 60;
+      return timeInMinutes / elapsedDistanceInKm;
     }
     return 0;
   }
