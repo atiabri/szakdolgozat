@@ -33,7 +33,8 @@ class _MapPageState extends State<MapPage> {
   double? _previousAltitude;
   bool _isPaused = false;
   final StopWatchTimer _stopWatchTimer = StopWatchTimer();
-  Timer? _locationTimer; // Timer for 1-second updates
+  Timer? _locationTimer;
+  int _lastCheckpointTime = 0;
 
   @override
   void initState() {
@@ -77,8 +78,12 @@ class _MapPageState extends State<MapPage> {
 
       if (_dist / 1000 > _kmCheckpoint) {
         _kmCheckpoint += 1;
-        double currentAvgSpeed = _calculateCurrentAvgSpeed();
-        _speedsPerKm.add(currentAvgSpeed);
+
+        int elapsedTimeForKm = _time - _lastCheckpointTime;
+        double speedForKm = elapsedTimeForKm / 60000.0;
+        _speedsPerKm.add(speedForKm);
+
+        _lastCheckpointTime = _time;
       }
 
       if (_previousAltitude != null && event.altitude != null) {
@@ -102,23 +107,17 @@ class _MapPageState extends State<MapPage> {
     _updateAverageSpeed();
   }
 
-  double _calculateCurrentAvgSpeed() {
-    if (_dist > 0) {
-      double elapsedTimeInSeconds = _time / 1000;
-      double elapsedDistanceInKm = _dist / 1000;
+  void _calculateRemainingSpeed() {
+    if (_dist % 1000 > 0) {
+      double remainingDistance = _dist % 1000;
+      int elapsedTimeSinceLastCheckpoint = _time - _lastCheckpointTime;
 
-      // Handle the case for the last unfinished kilometer
-      if (_speedsPerKm.isNotEmpty &&
-          elapsedDistanceInKm < _speedsPerKm.length + 1) {
-        double remainingDistance = elapsedDistanceInKm - _kmCheckpoint;
-        double remainingTimeInMinutes = elapsedTimeInSeconds / 60;
-        return remainingTimeInMinutes / remainingDistance;
+      if (elapsedTimeSinceLastCheckpoint > 0) {
+        double speedForRemaining = (elapsedTimeSinceLastCheckpoint / 60000.0) /
+            (remainingDistance / 1000);
+        _speedsPerKm.add(speedForRemaining);
       }
-
-      double timeInMinutes = elapsedTimeInSeconds / 60;
-      return timeInMinutes / elapsedDistanceInKm;
     }
-    return 0;
   }
 
   void _updateAverageSpeed() {
